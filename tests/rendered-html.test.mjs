@@ -22,6 +22,7 @@ test("server-renders Tibo Bless without starter metadata", async () => {
   assert.match(html, /언제 올까요/);
   assert.match(html, /CODEX/);
   assert.doesNotMatch(html, /Juice|Capability|역량/);
+  assert.doesNotMatch(html, /\/Users\/|\.vinext\/fonts/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
 });
 
