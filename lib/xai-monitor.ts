@@ -205,7 +205,7 @@ async function fetchDiscoveries(apiKey: string, now: Date): Promise<Discovery[]>
   });
 
   if (!response.ok) {
-    throw new Error(`SpaceXAI returned HTTP ${response.status}`);
+    throw new Error(await describeXaiError(response));
   }
 
   const payload = await response.json();
@@ -315,6 +315,26 @@ function result(
 function safeErrorMessage(error: unknown) {
   const message = error instanceof Error ? error.message : "Unknown refresh error";
   return message.replace(/[\r\n]+/g, " ").slice(0, 400);
+}
+
+async function describeXaiError(response: Response) {
+  const prefix = `SpaceXAI returned HTTP ${response.status}`;
+  try {
+    const body = await response.json() as {
+      error?: { message?: unknown } | string;
+      message?: unknown;
+    };
+    const detail = typeof body.error === "string"
+      ? body.error
+      : typeof body.error?.message === "string"
+        ? body.error.message
+        : typeof body.message === "string"
+          ? body.message
+          : null;
+    return detail ? `${prefix}: ${safeErrorMessage(detail)}` : prefix;
+  } catch {
+    return prefix;
+  }
 }
 
 function formatIsoDate(date: Date) {
