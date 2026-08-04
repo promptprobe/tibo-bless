@@ -38,6 +38,7 @@ type StoredState = {
   lastAttemptAt: string | null;
   lastSuccessAt: string | null;
   lastError: string | null;
+  keyFingerprint: string | null;
 };
 
 type Discovery = {
@@ -79,16 +80,19 @@ export async function refreshMonitorSnapshot(
     return result(snapshot, "missing-key", lastSuccessAt, lastAttemptAt);
   }
 
+  const keyFingerprint = await fingerprintApiKey(env.XAI_API_KEY);
+
   if (
     !options.force
     && stored?.lastError
+    && stored.keyFingerprint === keyFingerprint
     && Number.isFinite(lastAttemptMs)
     && now.getTime() - lastAttemptMs < REFRESH_INTERVAL_MS
   ) {
     return result(snapshot, "error", lastSuccessAt, lastAttemptAt, stored.lastError);
   }
 
-  const acquired = await acquireRefreshLock(env.DB, snapshot, now);
+  const acquired = await acquireRefreshLock(env.DB, snapshot, now, keyFingerprint);
   if (!acquired) {
     const current = await readStoredState(env.DB);
     return result(
@@ -131,7 +135,8 @@ export async function ensureMonitorSchema(db: D1Database) {
       snapshot_json TEXT NOT NULL,
       last_attempt_at TEXT,
       last_success_at TEXT,
-      last_error TEXT
+      last_error TEXT,
+      key_fingerprint TEXT
     )
   `).run();
 }
@@ -142,25 +147,41 @@ async function readStoredState(db: D1Database): Promise<StoredState | null> {
       snapshot_json AS snapshotJson,
       last_attempt_at AS lastAttemptAt,
       last_success_at AS lastSuccessAt,
-      last_error AS lastError
+      last_error AS lastError,
+      key_fingerprint AS keyFingerprint
     FROM monitor_sync_state
     WHERE id = ?
   `).bind(SYNC_ID).first<StoredState>();
   return row ?? null;
 }
 
-async function acquireRefreshLock(db: D1Database, snapshot: MonitorSnapshot, now: Date) {
+async function acquireRefreshLock(
+  db: D1Database,
+  snapshot: MonitorSnapshot,
+  now: Date,
+  keyFingerprint: string,
+) {
   const lockCutoff = new Date(now.getTime() - LOCK_TIMEOUT_MS).toISOString();
   const lock = await db.prepare(`
-    INSERT INTO monitor_sync_state (id, snapshot_json, last_attempt_at)
-    VALUES (?, ?, ?)
+    INSERT INTO monitor_sync_state (id, snapshot_json, last_attempt_at, key_fingerprint)
+    VALUES (?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       last_attempt_at = excluded.last_attempt_at,
-      last_error = NULL
-    WHERE monitor_sync_state.last_attempt_at IS NULL
+      last_error = NULL,
+      key_fingerprint = excluded.key_fingerprint
+    WHERE monitor_sync_state.key_fingerprint IS NULL
+       OR monitor_sync_state.key_fingerprint != excluded.key_fingerprint
+       OR monitor_sync_state.last_attempt_at IS NULL
        OR monitor_sync_state.last_attempt_at < ?
-  `).bind(SYNC_ID, JSON.stringify(snapshot), now.toISOString(), lockCutoff).run();
+  `).bind(SYNC_ID, JSON.stringify(snapshot), now.toISOString(), keyFingerprint, lockCutoff).run();
   return Number(lock.meta?.changes ?? 0) > 0;
+}
+
+async function fingerprintApiKey(apiKey: string) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(apiKey));
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 async function fetchDiscoveries(apiKey: string, now: Date): Promise<Discovery[]> {

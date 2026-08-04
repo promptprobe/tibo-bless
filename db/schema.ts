@@ -6,4 +6,5 @@ export const monitorSyncState = sqliteTable("monitor_sync_state", {
   lastAttemptAt: text("last_attempt_at"),
   lastSuccessAt: text("last_success_at"),
   lastError: text("last_error"),
+  keyFingerprint: text("key_fingerprint"),
 });
