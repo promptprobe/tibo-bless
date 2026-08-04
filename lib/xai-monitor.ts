@@ -10,7 +10,7 @@ export const REFRESH_INTERVAL_HOURS = 4;
 export const REFRESH_INTERVAL_MS = REFRESH_INTERVAL_HOURS * 60 * 60 * 1000;
 
 const SYNC_ID = "latest";
-const LOCK_TIMEOUT_MS = 10 * 60 * 1000;
+const LOCK_TIMEOUT_MS = 60 * 1000;
 const SEARCH_WINDOW_DAYS = 8;
 const RETAIN_LIVE_DAYS = 30;
 
