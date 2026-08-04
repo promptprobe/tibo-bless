@@ -1,4 +1,4 @@
-const CACHE_NAME = "tibo-bless-v6";
+const CACHE_NAME = "tibo-bless-v8";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/og.png"];
 
 self.addEventListener("install", (event) => {
