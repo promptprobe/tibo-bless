@@ -1,0 +1,1 @@
+ALTER TABLE `monitor_sync_state` ADD `key_fingerprint` text;
