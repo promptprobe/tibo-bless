@@ -32,6 +32,6 @@ test("ships an installable bilingual PWA shell", async () => {
   assert.equal(manifest.short_name, "Tibo Bless");
   assert.equal(manifest.display, "standalone");
   assert.deepEqual(manifest.icons.map((icon) => icon.sizes), ["192x192", "512x512"]);
-  assert.match(serviceWorker, /tibo-bless-v6/);
+  assert.match(serviceWorker, /tibo-bless-v8/);
   assert.match(serviceWorker, /manifest\.webmanifest/);
 });
