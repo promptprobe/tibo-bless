@@ -1,4 +1,9 @@
-// Intentionally empty by default.
-// Add Drizzle tables here when the site actually needs a database.
-// See examples/d1/db/schema.ts for an opt-in example.
-export {};
+import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+
+export const monitorSyncState = sqliteTable("monitor_sync_state", {
+  id: text("id").primaryKey(),
+  snapshotJson: text("snapshot_json").notNull(),
+  lastAttemptAt: text("last_attempt_at"),
+  lastSuccessAt: text("last_success_at"),
+  lastError: text("last_error"),
+});

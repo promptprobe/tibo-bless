@@ -17,6 +17,8 @@ export type Signal = {
   createdAt: string;
   text: string;
   author: string;
+  handle: string;
+  parentText: Localized;
   sourceUrl: string;
   classification: "archived-signal" | "negative-signal" | "upward-signal";
   impact24h: number;
@@ -24,7 +26,13 @@ export type Signal = {
   ttlHours: number;
 };
 
-export const monitorData = {
+export type MonitorSnapshot = {
+  generatedAt: string;
+  events: ResetEvent[];
+  signals: Signal[];
+};
+
+export const monitorData: MonitorSnapshot = {
   generatedAt: "2026-08-04T08:00:00Z",
   events: [
     {
@@ -123,9 +131,19 @@ export const monitorData = {
       sourceUrl: "https://x.com/thsottiaux/status/2083395449814229287",
       reason: { ko: "‘I have reset’ 완료형과 Codex 전체 범위가 명시됩니다.", en: "The completed phrase ‘I have reset’ and broad Codex scope are explicit." },
     },
-  ] as ResetEvent[],
+  ],
   signals: [
-    { id: "signal-2026-07-25", createdAt: "2026-07-25T19:17:00Z", text: "Trying, but not sure this time", author: "Tibo", sourceUrl: "https://x.com/thsottiaux/status/2081446159361675631", classification: "archived-signal", impact24h: 3, impact48h: 3, ttlHours: 48 },
-    { id: "signal-2026-07-30", createdAt: "2026-07-30T18:24:00Z", text: "Calm down, calm down", author: "Tibo", sourceUrl: "https://x.com/thsottiaux/status/2082895176696221738", classification: "negative-signal", impact24h: -2, impact48h: -3, ttlHours: 48 },
-  ] as Signal[],
+    {
+      id: "signal-2026-07-25", createdAt: "2026-07-25T19:17:00Z",
+      text: "Trying, but not sure this time", author: "Tibo Sottiaux", handle: "@thsottiaux",
+      parentText: { ko: "티보, 이번에도 사용량 리셋을 받을 수 있을까요?", en: "Hey Tibo, can we get another usage reset?" },
+      sourceUrl: "https://x.com/thsottiaux/status/2081446159361675631", classification: "archived-signal", impact24h: 3, impact48h: 3, ttlHours: 48,
+    },
+    {
+      id: "signal-2026-07-30", createdAt: "2026-07-30T18:24:00Z",
+      text: "Calm down, calm down", author: "Tibo Sottiaux", handle: "@thsottiaux",
+      parentText: { ko: "기념으로 사용량 리셋도 해주세요!", en: "We should celebrate with a usage reset!" },
+      sourceUrl: "https://x.com/thsottiaux/status/2082895176696221738", classification: "negative-signal", impact24h: -2, impact48h: -3, ttlHours: 48,
+    },
+  ],
 };
