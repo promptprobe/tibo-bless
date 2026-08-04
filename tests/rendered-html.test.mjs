@@ -54,6 +54,8 @@ test("serves the baseline monitor safely when hosted secrets are unavailable", a
   const payload = await response.json();
   assert.equal(payload.meta.intervalHours, 4);
   assert.equal(payload.meta.status, "missing-key");
+  assert.equal(payload.meta.lastAttemptAt, null);
+  assert.equal(payload.meta.error, null);
   assert.equal(payload.snapshot.events.length, 12);
   assert.equal(payload.snapshot.signals.length, 2);
 });

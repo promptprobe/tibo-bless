@@ -41,6 +41,8 @@ const worker = {
             intervalHours: 4,
             status: "missing-key",
             lastSuccessAt: null,
+            lastAttemptAt: null,
+            error: null,
           },
         }, { headers: { "Cache-Control": "no-store" } });
       }

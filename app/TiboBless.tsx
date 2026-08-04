@@ -7,7 +7,12 @@ import { monitorData, type Localized, type MonitorSnapshot, type ResetEvent, typ
 
 type Language = "ko" | "en";
 type TimelineItem = { kind: "reset"; item: ResetEvent } | { kind: "signal"; item: Signal };
-type LiveMonitorMeta = { lastSuccessAt: string | null; status: string };
+type LiveMonitorMeta = {
+  lastSuccessAt: string | null;
+  lastAttemptAt: string | null;
+  status: string;
+  error: string | null;
+};
 
 const labels = {
   ko: {

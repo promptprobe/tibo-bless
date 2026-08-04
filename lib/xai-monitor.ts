@@ -24,6 +24,8 @@ export type MonitorSyncMeta = {
   intervalHours: 4;
   status: "fresh" | "updated" | "refreshing" | "missing-key" | "error";
   lastSuccessAt: string | null;
+  lastAttemptAt: string | null;
+  error: string | null;
 };
 
 export type MonitorSyncResult = {
@@ -66,18 +68,36 @@ export async function refreshMonitorSnapshot(
   const snapshot = mergeSnapshots(monitorData, parseSnapshot(stored?.snapshotJson), [], now);
   const lastSuccessAt = stored?.lastSuccessAt ?? null;
   const lastSuccessMs = lastSuccessAt ? new Date(lastSuccessAt).getTime() : Number.NaN;
+  const lastAttemptAt = stored?.lastAttemptAt ?? null;
+  const lastAttemptMs = lastAttemptAt ? new Date(lastAttemptAt).getTime() : Number.NaN;
 
   if (!options.force && Number.isFinite(lastSuccessMs) && now.getTime() - lastSuccessMs < REFRESH_INTERVAL_MS) {
-    return result(snapshot, "fresh", lastSuccessAt);
+    return result(snapshot, "fresh", lastSuccessAt, lastAttemptAt);
   }
 
   if (!env.XAI_API_KEY) {
-    return result(snapshot, "missing-key", lastSuccessAt);
+    return result(snapshot, "missing-key", lastSuccessAt, lastAttemptAt);
+  }
+
+  if (
+    !options.force
+    && stored?.lastError
+    && Number.isFinite(lastAttemptMs)
+    && now.getTime() - lastAttemptMs < REFRESH_INTERVAL_MS
+  ) {
+    return result(snapshot, "error", lastSuccessAt, lastAttemptAt, stored.lastError);
   }
 
   const acquired = await acquireRefreshLock(env.DB, snapshot, now);
   if (!acquired) {
-    return result(snapshot, "refreshing", lastSuccessAt);
+    const current = await readStoredState(env.DB);
+    return result(
+      snapshot,
+      current?.lastError ? "error" : "refreshing",
+      current?.lastSuccessAt ?? lastSuccessAt,
+      current?.lastAttemptAt ?? lastAttemptAt,
+      current?.lastError ?? null,
+    );
   }
 
   try {
@@ -91,7 +111,7 @@ export async function refreshMonitorSnapshot(
       WHERE id = ?
     `).bind(JSON.stringify(nextSnapshot), refreshedAt, SYNC_ID).run();
 
-    return result(nextSnapshot, "updated", refreshedAt);
+    return result(nextSnapshot, "updated", refreshedAt, refreshedAt);
   } catch (error) {
     const message = safeErrorMessage(error);
     await env.DB.prepare(`
@@ -100,7 +120,7 @@ export async function refreshMonitorSnapshot(
       WHERE id = ?
     `).bind(message, SYNC_ID).run();
     console.error("SpaceXAI monitor refresh failed", message);
-    return result(snapshot, "error", lastSuccessAt);
+    return result(snapshot, "error", lastSuccessAt, now.toISOString(), message);
   }
 }
 
@@ -134,7 +154,9 @@ async function acquireRefreshLock(db: D1Database, snapshot: MonitorSnapshot, now
   const lock = await db.prepare(`
     INSERT INTO monitor_sync_state (id, snapshot_json, last_attempt_at)
     VALUES (?, ?, ?)
-    ON CONFLICT(id) DO UPDATE SET last_attempt_at = excluded.last_attempt_at
+    ON CONFLICT(id) DO UPDATE SET
+      last_attempt_at = excluded.last_attempt_at,
+      last_error = NULL
     WHERE monitor_sync_state.last_attempt_at IS NULL
        OR monitor_sync_state.last_attempt_at < ?
   `).bind(SYNC_ID, JSON.stringify(snapshot), now.toISOString(), lockCutoff).run();
@@ -270,10 +292,23 @@ function dedupeById<T extends { id: string }>(items: T[]) {
   return [...new Map(items.map((item) => [item.id, item])).values()];
 }
 
-function result(snapshot: MonitorSnapshot, status: MonitorSyncMeta["status"], lastSuccessAt: string | null): MonitorSyncResult {
+function result(
+  snapshot: MonitorSnapshot,
+  status: MonitorSyncMeta["status"],
+  lastSuccessAt: string | null,
+  lastAttemptAt: string | null,
+  error: string | null = null,
+): MonitorSyncResult {
   return {
     snapshot,
-    meta: { source: "spacexai-x-search", intervalHours: 4, status, lastSuccessAt },
+    meta: {
+      source: "spacexai-x-search",
+      intervalHours: 4,
+      status,
+      lastSuccessAt,
+      lastAttemptAt,
+      error,
+    },
   };
 }
 
