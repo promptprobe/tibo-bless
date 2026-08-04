@@ -11,14 +11,14 @@ async function render() {
   }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("server-renders Tibos Mercy without starter metadata", async () => {
+test("server-renders Tibo Bless without starter metadata", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>Tibos Mercy — Codex Reset Intelligence<\/title>/i);
-  assert.match(html, /Tibos Mercy/);
-  assert.match(html, /Tibo의 자비는/);
+  assert.match(html, /<title>Tibo Bless — Codex Reset Intelligence<\/title>/i);
+  assert.match(html, /Tibo Bless/);
+  assert.match(html, /Tibo의 축복은/);
   assert.match(html, /CODEX/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
 });
@@ -26,9 +26,9 @@ test("server-renders Tibos Mercy without starter metadata", async () => {
 test("ships an installable bilingual PWA shell", async () => {
   const manifest = JSON.parse(await readFile(new URL("../public/manifest.webmanifest", import.meta.url), "utf8"));
   const serviceWorker = await readFile(new URL("../public/sw.js", import.meta.url), "utf8");
-  assert.equal(manifest.short_name, "Tibos Mercy");
+  assert.equal(manifest.short_name, "Tibo Bless");
   assert.equal(manifest.display, "standalone");
   assert.deepEqual(manifest.icons.map((icon) => icon.sizes), ["192x192", "512x512"]);
-  assert.match(serviceWorker, /tibos-mercy-v3/);
+  assert.match(serviceWorker, /tibo-bless-v4/);
   assert.match(serviceWorker, /manifest\.webmanifest/);
 });

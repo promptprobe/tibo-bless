@@ -14,28 +14,28 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tibos-mercy.cloudy-gull-7634.chatgpt.site"),
-  title: "Tibos Mercy — Codex Reset Intelligence",
+  title: "Tibo Bless — Codex Reset Intelligence",
   description:
     "A bilingual monitor for verified Codex resets, reasoning Juice, and capability signals.",
-  applicationName: "Tibos Mercy",
+  applicationName: "Tibo Bless",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }, { url: "/icon-512.png", sizes: "512x512", type: "image/png" }],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Tibos Mercy" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Tibo Bless" },
   openGraph: {
-    title: "Tibos Mercy",
+    title: "Tibo Bless",
     description:
       "Verified Codex reset evidence, forecast probabilities, Juice, and capability signals — in Korean and English.",
     type: "website",
     locale: "ko_KR",
     alternateLocale: "en_US",
-    images: [{ url: "/og.png", width: 1731, height: 909, alt: "Tibos Mercy — Codex Reset Intelligence" }],
+    images: [{ url: "/og.png", width: 1734, height: 907, alt: "Tibo Bless — Codex Reset Intelligence" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tibos Mercy",
+    title: "Tibo Bless",
     description: "Bilingual Codex reset intelligence.",
     images: ["/og.png"],
   },

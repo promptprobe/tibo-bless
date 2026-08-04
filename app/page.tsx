@@ -1,5 +1,5 @@
-import { TibosMercy } from "./TibosMercy";
+import { TiboBless } from "./TiboBless";
 
 export default function Home() {
-  return <TibosMercy />;
+  return <TiboBless />;
 }
