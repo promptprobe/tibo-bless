@@ -1,0 +1,16 @@
+{
+  "name": "Tibos Mercy — Codex Reset Intelligence",
+  "short_name": "Tibos Mercy",
+  "description": "Bilingual Codex reset intelligence, Juice, capability signals, and the waiting game.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
+  "lang": "ko",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
