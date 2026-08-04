@@ -1,7 +1,7 @@
 {
-  "name": "Tibo Bless — Codex Reset Intelligence",
+  "name": "Tibo Bless — Codex Reset Monitor",
   "short_name": "Tibo Bless",
-  "description": "Bilingual Codex reset intelligence, Juice, capability signals, and the waiting game.",
+  "description": "A simple bilingual monitor for verified Codex resets and next-reset probabilities.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

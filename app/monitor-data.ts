@@ -128,28 +128,4 @@ export const monitorData = {
     { id: "signal-2026-07-25", createdAt: "2026-07-25T19:17:00Z", text: "Trying, but not sure this time", author: "Tibo", sourceUrl: "https://x.com/thsottiaux/status/2081446159361675631", classification: "archived-signal", impact24h: 3, impact48h: 3, ttlHours: 48 },
     { id: "signal-2026-07-30", createdAt: "2026-07-30T18:24:00Z", text: "Calm down, calm down", author: "Tibo", sourceUrl: "https://x.com/thsottiaux/status/2082895176696221738", classification: "negative-signal", impact24h: -2, impact48h: -3, ttlHours: 48 },
   ] as Signal[],
-  forecastHistory: [
-    { calculatedAt: "2026-07-20T12:00:00Z", score24h: 62, score48h: 78 },
-    { calculatedAt: "2026-07-24T12:00:00Z", score24h: 57, score48h: 72 },
-    { calculatedAt: "2026-07-27T12:00:00Z", score24h: 55, score48h: 70 },
-    { calculatedAt: "2026-07-31T12:00:00Z", score24h: 58, score48h: 71 },
-  ],
-  juiceSweeps: [
-    { id: "juice-2026-07-24", checkedAt: "2026-07-24T03:00:00Z", complete: true, values: { Low: 18, Medium: 32, High: 128, XHigh: 128, Max: 960, Ultra: 960 } },
-    { id: "juice-2026-07-25", checkedAt: "2026-07-25T03:00:00Z", complete: true, values: { Low: 18, Medium: 32, High: 128, XHigh: 256, Max: 960, Ultra: 960 } },
-    { id: "juice-2026-07-27", checkedAt: "2026-07-27T03:00:00Z", complete: true, values: { Low: 18, Medium: 32, High: 128, XHigh: 128, Max: 960, Ultra: 960 } },
-    { id: "juice-2026-07-30", checkedAt: "2026-07-30T03:00:00Z", complete: true, values: { Low: 18, Medium: 32, High: 128, XHigh: 128, Max: 960, Ultra: 960 } },
-  ],
-  capability: {
-    observedAt: "2026-08-04T07:05:00Z", totalTasks: 112,
-    efforts: [
-      { name: "Low", score: 74.0, tasks: 55, delta: -1.3 },
-      { name: "Medium", score: 91.5, tasks: 68, delta: 0.0 },
-      { name: "High", score: 83.4, tasks: 62, delta: 1.3 },
-      { name: "XHigh", score: 109.0, tasks: 81, delta: 0.0 },
-      { name: "Max", score: 100.9, tasks: 75, delta: 0.0 },
-      { name: "Ultra", score: null, tasks: null, delta: null },
-    ],
-    trend: [99.5, 102.2, 104.9, 103.6, 102.2, 102.2, 102.2, 106.3, 109.0, 109.0],
-  },
 };
