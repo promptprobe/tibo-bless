@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildMercyCalendar, classifyPost, empiricalForecast, evaluateCapability, evaluateJuice } from "../lib/monitor-logic.js";
+import { buildBlessCalendar, classifyPost, empiricalForecast, evaluateCapability, evaluateJuice } from "../lib/monitor-logic.js";
 
 test("confirms only completed broad resets", () => {
   assert.equal(classifyPost({ text: "I have reset usage limits for all paid users of Codex and ChatGPT Work." }).classification, "confirmed-reset");
@@ -24,7 +24,7 @@ test("withholds capability conclusion after six hours", () => {
 });
 
 test("builds a 26-week waiting game with evidence-bearing reset days", () => {
-  const result = buildMercyCalendar([
+  const result = buildBlessCalendar([
     { type: "confirmed-reset", dateTime: "2026-07-10T05:30:00Z", sourceUrl: "https://example.com/one" },
     { type: "confirmed-reset", dateTime: "2026-07-10T19:03:00Z", sourceUrl: "https://example.com/two" },
     { type: "confirmed-reset", dateTime: "2026-08-01T03:32:00Z", sourceUrl: "https://example.com/three" },

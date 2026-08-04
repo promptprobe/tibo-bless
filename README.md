@@ -1,15 +1,15 @@
-# Tibos Mercy
+# Tibo Bless
 
-[![Open Tibos Mercy PWA](https://img.shields.io/badge/Open_PWA-Tibos_Mercy-111111?style=for-the-badge)](https://tibos-mercy.cloudy-gull-7634.chatgpt.site)
+[![Open Tibo Bless PWA](https://img.shields.io/badge/Open_PWA-Tibo_Bless-111111?style=for-the-badge)](https://tibos-mercy.cloudy-gull-7634.chatgpt.site)
 
 **[PWA 실행·설치 / Open & install the PWA](https://tibos-mercy.cloudy-gull-7634.chatgpt.site)**
 
 브라우저의 `앱 설치` 또는 `홈 화면에 추가` 기능으로 설치할 수 있습니다. 앱 상단의 **앱 설치** 버튼도 같은 설치 흐름을 안내합니다.  
 Install it through your browser’s **Install app** or **Add to Home Screen** action. The in-app **Install app** button opens the same flow.
 
-Tibos Mercy는 공개 근거를 바탕으로 Codex의 글로벌 사용량 리셋, reasoning Juice, 모델 역량 변화를 추적하는 한국어·영어 동시 지원 웹 앱입니다.
+Tibo Bless는 공개 근거를 바탕으로 Codex의 글로벌 사용량 리셋, reasoning Juice, 모델 역량 변화를 추적하는 한국어·영어 동시 지원 웹 앱입니다.
 
-Tibos Mercy is a bilingual Korean/English web app that monitors global Codex usage resets, reasoning Juice, and model-capability signals from public evidence.
+Tibo Bless is a bilingual Korean/English web app that monitors global Codex usage resets, reasoning Juice, and model-capability signals from public evidence.
 
 ## 핵심 로직 / Core logic
 
@@ -42,7 +42,7 @@ npm run lint
 ## 구조 / Structure
 
 ```text
-app/TibosMercy.tsx     bilingual product UI and interactions
+app/TiboBless.tsx      bilingual product UI and interactions
 app/monitor-data.ts    public evidence and measurement snapshot
 lib/monitor-logic.js   classification, forecast, Juice, capability logic
 public/manifest.webmanifest  PWA metadata and install icons
@@ -57,4 +57,4 @@ tests/                 logic and server-render tests
 
 The repository ships with a source-linked public sample snapshot. Live recurring collection requires X API access and a scheduler. Juice is not an official OpenAI metric, and all probabilities are experimental estimates—not guarantees.
 
-Tibos Mercy is independent and not affiliated with OpenAI.
+Tibo Bless is independent and not affiliated with OpenAI.

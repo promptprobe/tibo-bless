@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { buildForecast, buildMercyCalendar, evaluateCapability, evaluateJuice, predictionPerformance } from "@/lib/monitor-logic";
+import { buildBlessCalendar, buildForecast, evaluateCapability, evaluateJuice, predictionPerformance } from "@/lib/monitor-logic";
 import { monitorData, type Localized } from "./monitor-data";
 
 type Language = "ko" | "en";
@@ -11,14 +11,14 @@ type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<
 const labels = {
   ko: {
     reset: "리셋", juice: "Juice", capability: "역량", alerts: "알림", installApp: "앱 설치", installHint: "브라우저 메뉴에서 ‘홈 화면에 추가’ 또는 ‘앱 설치’를 선택하세요.", language: "EN",
-    eyebrow: "공개 근거 기반 CODEX 모니터", heroTitle: "Tibo의 자비는\n언제 올까요?",
+    eyebrow: "공개 근거 기반 CODEX 모니터", heroTitle: "Tibo의 축복은\n언제 올까요?",
     heroBody: "공개 게시물의 표현, 범위, 시점을 분류해 글로벌 Codex 리셋과 다음 24·48시간 가능성을 추적합니다.",
     heroCta: "최신 근거 보기", verified: "검증된 공개 근거", noGuarantee: "실험적 확률 · 보장값 아님",
     nextReset: "다음 리셋 가능성", lastReset: "마지막 확정 리셋", since: "경과", hours24: "24시간", hours48: "48시간",
     analysis: "계산 근거", trackRecord: "예측 기록", forecastReason: "왜 이 확률인가요?",
     baseline: "활성 예측 신호가 없어 보수적인 과거 리셋 간격 기준을 사용합니다.",
-    waitingKicker: "THE WAITING GAME", waitingTitle: "우리는 기다렸고, Tibo는 리셋했다.", waitingBody: "최근 26주를 한눈에 봅니다. 검은 칸은 자비가 온 날, 숫자는 하루에 여러 번 리셋된 날입니다.",
-    mercyDays: "자비가 온 날", currentWait: "현재 기다림", longestWait: "최장 기다림", less: "기다림", more: "자비", noReset: "리셋 없음", resetsOnDay: "회 리셋", calendarHint: "리셋된 날짜를 누르면 공개 근거로 이동합니다.",
+    waitingKicker: "THE WAITING GAME", waitingTitle: "우리는 기다렸고, Tibo의 축복이 왔다.", waitingBody: "최근 26주를 한눈에 봅니다. 검은 칸은 축복이 온 날, 숫자는 하루에 여러 번 리셋된 날입니다.",
+    blessDays: "축복이 온 날", currentWait: "현재 기다림", longestWait: "최장 기다림", less: "기다림", more: "축복", noReset: "리셋 없음", resetsOnDay: "회 리셋", calendarHint: "리셋된 날짜를 누르면 공개 근거로 이동합니다.",
     sourceLedger: "출처를 보존하는 공개 장부", timeline: "리셋 타임라인", timelineBody: "확정 리셋과 확률을 바꾼 공개 신호. 최신 항목부터 표시합니다.",
     confirmed: "확정 리셋", signal: "공개 신호", source: "원문 보기", scope: "범위",
     evidenceKicker: "최신 검증 근거", evidenceTitle: "완료형 + 광범위 범위", evidenceBody: "기대, 요청, 개인 한도가 아니라 광범위한 사용자에게 완료된 리셋이라고 명시해야 확정합니다.", whyConfirmed: "확정 이유",
@@ -31,14 +31,14 @@ const labels = {
   },
   en: {
     reset: "Reset", juice: "Juice", capability: "Capability", alerts: "Alerts", installApp: "Install app", installHint: "Choose ‘Install app’ or ‘Add to Home Screen’ from your browser menu.", language: "KO",
-    eyebrow: "PUBLIC-EVIDENCE CODEX MONITOR", heroTitle: "When will Tibo\nshow mercy?",
+    eyebrow: "PUBLIC-EVIDENCE CODEX MONITOR", heroTitle: "When will Tibo\nbless us?",
     heroBody: "We classify the wording, scope, and timing of public posts to track global Codex resets and the next 24/48-hour probability.",
     heroCta: "See latest evidence", verified: "Verified public evidence", noGuarantee: "Experimental probability · not a guarantee",
     nextReset: "Next reset probability", lastReset: "Latest confirmed reset", since: "Elapsed", hours24: "24 hours", hours48: "48 hours",
     analysis: "Calculation", trackRecord: "Track record", forecastReason: "Why this estimate?",
     baseline: "No active predictive signal remains, so the conservative historical reset-interval baseline is used.",
-    waitingKicker: "THE WAITING GAME", waitingTitle: "We waited. Tibo reset.", waitingBody: "A 26-week view of the wait. Black means mercy arrived; a number marks multiple resets on the same day.",
-    mercyDays: "Mercy days", currentWait: "Current wait", longestWait: "Longest wait", less: "Waiting", more: "Mercy", noReset: "No reset", resetsOnDay: "resets", calendarHint: "Select a reset day to open its public evidence.",
+    waitingKicker: "THE WAITING GAME", waitingTitle: "We waited. Tibo blessed us.", waitingBody: "A 26-week view of the wait. Black means the blessing arrived; a number marks multiple resets on the same day.",
+    blessDays: "Blessing days", currentWait: "Current wait", longestWait: "Longest wait", less: "Waiting", more: "Blessings", noReset: "No reset", resetsOnDay: "resets", calendarHint: "Select a reset day to open its public evidence.",
     sourceLedger: "SOURCE-PRESERVING PUBLIC LEDGER", timeline: "Reset timeline", timelineBody: "Confirmed resets and public signals that changed the estimate. Latest first.",
     confirmed: "Confirmed reset", signal: "Public signal", source: "View source", scope: "Scope",
     evidenceKicker: "LATEST VERIFIED EVIDENCE", evidenceTitle: "Completed action + broad scope", evidenceBody: "A post must describe a completed reset for a broad group—not a hope, request, or personal limit—to be confirmed.", whyConfirmed: "Why it is confirmed",
@@ -55,7 +55,7 @@ function local(value: Localized, language: Language) {
   return value[language];
 }
 
-export function TibosMercy() {
+export function TiboBless() {
   const [language, setLanguage] = useState<Language>("ko");
   const [view, setView] = useState<View>("reset");
   const [analysisOpen, setAnalysisOpen] = useState(false);
@@ -66,12 +66,12 @@ export function TibosMercy() {
   const performance = useMemo(() => predictionPerformance(monitorData.forecastHistory, monitorData.events), []);
   const juice = useMemo(() => evaluateJuice(monitorData.juiceSweeps), []);
   const capability = useMemo(() => evaluateCapability(monitorData.capability, now), [now]);
-  const mercyCalendar = useMemo(() => buildMercyCalendar(monitorData.events, now, 26), [now]);
+  const blessCalendar = useMemo(() => buildBlessCalendar(monitorData.events, now, 26), [now]);
   const resets = useMemo(() => [...monitorData.events].sort((a, b) => b.dateTime.localeCompare(a.dateTime)), []);
   const latest = resets[0];
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("tibos-mercy-language");
+    const saved = window.localStorage.getItem("tibo-bless-language");
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate the user preference after SSR
     if (saved === "ko" || saved === "en") setLanguage(saved);
     const hash = window.location.hash.slice(1);
@@ -80,7 +80,7 @@ export function TibosMercy() {
 
   useEffect(() => {
     document.documentElement.lang = language;
-    window.localStorage.setItem("tibos-mercy-language", language);
+    window.localStorage.setItem("tibo-bless-language", language);
   }, [language]);
 
   useEffect(() => {
@@ -120,7 +120,7 @@ export function TibosMercy() {
     if (!("Notification" in window)) return;
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
-      new Notification("Tibos Mercy", { body: language === "ko" ? "브라우저 알림이 켜졌습니다." : "Browser alerts are enabled." });
+      new Notification("Tibo Bless", { body: language === "ko" ? "브라우저 알림이 켜졌습니다." : "Browser alerts are enabled." });
     }
   };
 
@@ -137,8 +137,8 @@ export function TibosMercy() {
   return (
     <div className="site-shell">
       <header className="top-nav">
-        <button className="wordmark" onClick={() => selectView("reset")} aria-label="Tibos Mercy home">
-          <span className="brand-mark">TM</span><strong>Tibos Mercy</strong>
+        <button className="wordmark" onClick={() => selectView("reset")} aria-label="Tibo Bless home">
+          <span className="brand-mark">TB</span><strong>Tibo Bless</strong>
         </button>
         <nav className="nav-pill" aria-label="Monitor views">
           {(["reset", "juice", "capability"] as View[]).map((item) => (
@@ -168,7 +168,7 @@ export function TibosMercy() {
                 </div>
               </div>
               <div className="hero-product-card" aria-label={copy.nextReset}>
-                <div className="product-window-bar"><span /><span /><span /><b>tibos-mercy / reset</b></div>
+                <div className="product-window-bar"><span /><span /><span /><b>tibo-bless / reset</b></div>
                 <div className="product-panel-head"><div><small>{copy.nextReset}</small><strong>{forecast.score48h}%</strong></div><span className="status-badge">LIVE</span></div>
                 <div className="probability-grid">
                   <ProbabilityRing value={forecast.score24h} label={copy.hours24} />
@@ -198,12 +198,12 @@ export function TibosMercy() {
                 <div className="waiting-game-heading">
                   <div className="section-heading"><p className="kicker">{copy.waitingKicker}</p><h2>{copy.waitingTitle}</h2><p>{copy.waitingBody}</p></div>
                   <div className="waiting-stats" aria-label={copy.waitingKicker}>
-                    <div><strong>{mercyCalendar.resetDays}</strong><span>{copy.mercyDays}</span></div>
-                    <div><strong>{mercyCalendar.currentWaitDays ?? "—"}</strong><span>{copy.currentWait} · {copy.days}</span></div>
-                    <div><strong>{mercyCalendar.longestWaitDays ?? "—"}</strong><span>{copy.longestWait} · {copy.days}</span></div>
+                    <div><strong>{blessCalendar.resetDays}</strong><span>{copy.blessDays}</span></div>
+                    <div><strong>{blessCalendar.currentWaitDays ?? "—"}</strong><span>{copy.currentWait} · {copy.days}</span></div>
+                    <div><strong>{blessCalendar.longestWaitDays ?? "—"}</strong><span>{copy.longestWait} · {copy.days}</span></div>
                   </div>
                 </div>
-                <MercyHeatmap calendar={mercyCalendar} language={language} copy={copy} />
+                <BlessHeatmap calendar={blessCalendar} language={language} copy={copy} />
                 <p className="calendar-hint">{copy.calendarHint}</p>
               </div>
             </section>
@@ -265,7 +265,7 @@ export function TibosMercy() {
         )}
       </main>
 
-      <footer className="dark-footer"><div className="container footer-grid"><div><div className="footer-wordmark"><span className="brand-mark">TM</span><strong>Tibos Mercy</strong></div><p>{copy.footerBody}</p></div><div><span>Monitor</span><button onClick={() => selectView("reset")}>{copy.reset}</button><button onClick={() => selectView("juice")}>{copy.juice}</button><button onClick={() => selectView("capability")}>{copy.capability}</button></div><div><span>Sources</span><a href="https://x.com/thsottiaux" target="_blank" rel="noreferrer">Tibo on X</a><a href="https://status.openai.com" target="_blank" rel="noreferrer">OpenAI Status</a><a href="https://codexradar.com/en/" target="_blank" rel="noreferrer">Codex Radar</a></div></div><div className="container footer-bottom"><span>© 2026 Tibos Mercy</span><span>{copy.disclaimer}</span><button onClick={toggleLanguage}>한국어 / English</button></div></footer>
+      <footer className="dark-footer"><div className="container footer-grid"><div><div className="footer-wordmark"><span className="brand-mark">TB</span><strong>Tibo Bless</strong></div><p>{copy.footerBody}</p></div><div><span>Monitor</span><button onClick={() => selectView("reset")}>{copy.reset}</button><button onClick={() => selectView("juice")}>{copy.juice}</button><button onClick={() => selectView("capability")}>{copy.capability}</button></div><div><span>Sources</span><a href="https://x.com/thsottiaux" target="_blank" rel="noreferrer">Tibo on X</a><a href="https://status.openai.com" target="_blank" rel="noreferrer">OpenAI Status</a><a href="https://codexradar.com/en/" target="_blank" rel="noreferrer">Codex Radar</a></div></div><div className="container footer-bottom"><span>© 2026 Tibo Bless</span><span>{copy.disclaimer}</span><button onClick={toggleLanguage}>한국어 / English</button></div></footer>
 
       {analysisOpen && <div className="modal-backdrop" role="presentation" onMouseDown={() => setAnalysisOpen(false)}><section className="analysis-modal" role="dialog" aria-modal="true" aria-label={copy.analysis} onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" onClick={() => setAnalysisOpen(false)} aria-label="Close">×</button><p className="kicker">FORECAST ANALYSIS</p><h2>{copy.analysis}</h2><dl><div><dt>{copy.method}</dt><dd>{forecast.method}</dd></div><div><dt>{copy.sample}</dt><dd>{forecast.sampleSize}</dd></div><div><dt>{copy.mean}</dt><dd>{forecast.meanIntervalDays} days</dd></div><div><dt>{copy.adjustment}</dt><dd>24h {forecast.adjustment24h >= 0 ? "+" : ""}{forecast.adjustment24h}pt · 48h {forecast.adjustment48h >= 0 ? "+" : ""}{forecast.adjustment48h}pt</dd></div></dl><button className="button-primary" onClick={() => setAnalysisOpen(false)}>OK</button></section></div>}
     </div>
@@ -287,7 +287,7 @@ function TrendBars({ values }: { values: number[] }) {
   return <div className="trend-chart" role="img" aria-label="Capability trend">{values.map((value, index) => <i key={`${value}-${index}`} style={{ height: `${Math.max(10, ((value - minimum) / (maximum - minimum)) * 100)}%` }}><span>{value.toFixed(1)}</span></i>)}</div>;
 }
 
-function MercyHeatmap({ calendar, language, copy }: { calendar: ReturnType<typeof buildMercyCalendar>; language: Language; copy: typeof labels.ko | typeof labels.en }) {
+function BlessHeatmap({ calendar, language, copy }: { calendar: ReturnType<typeof buildBlessCalendar>; language: Language; copy: typeof labels.ko | typeof labels.en }) {
   const locale = language === "ko" ? "ko-KR" : "en-US";
   const monthLabels = calendar.weeks.map((week, index) => {
     const firstVisible = week.find((day) => !day.future);
@@ -312,12 +312,12 @@ function MercyHeatmap({ calendar, language, copy }: { calendar: ReturnType<typeo
           {calendar.weeks.map((week, weekIndex) => <div className="heatmap-week" key={weekIndex}>{week.map((day) => {
             const label = describe(day);
             if (day.future) return <span className="heatmap-day future" key={day.date} aria-hidden="true" />;
-            if (day.count) return <a className={`heatmap-day mercy level-${Math.min(day.count, 2)}`} key={day.date} href={day.events[0].sourceUrl} target="_blank" rel="noreferrer" title={label} aria-label={label}>{day.count > 1 ? day.count : ""}</a>;
+            if (day.count) return <a className={`heatmap-day bless level-${Math.min(day.count, 2)}`} key={day.date} href={day.events[0].sourceUrl} target="_blank" rel="noreferrer" title={label} aria-label={label}>{day.count > 1 ? day.count : ""}</a>;
             return <span className="heatmap-day" key={day.date} title={label} aria-label={label} />;
           })}</div>)}
         </div>
       </div>
     </div>
-    <div className="heatmap-legend" aria-hidden="true"><span>{copy.less}</span><i /><i className="mercy" /><i className="mercy level-2">2</i><span>{copy.more}</span></div>
+    <div className="heatmap-legend" aria-hidden="true"><span>{copy.less}</span><i /><i className="bless" /><i className="bless level-2">2</i><span>{copy.more}</span></div>
   </div>;
 }
