@@ -22,6 +22,13 @@
       "when": 1785863302276,
       "tag": "0002_retry_xai_diagnostics",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1785863466750,
+      "tag": "0003_retry_xai_error_detail",
+      "breakpoints": true
     }
   ]
 }

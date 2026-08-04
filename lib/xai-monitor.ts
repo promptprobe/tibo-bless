@@ -313,7 +313,11 @@ function result(
 }
 
 function safeErrorMessage(error: unknown) {
-  const message = error instanceof Error ? error.message : "Unknown refresh error";
+  const message = typeof error === "string"
+    ? error
+    : error instanceof Error
+      ? error.message
+      : "Unknown refresh error";
   return message.replace(/[\r\n]+/g, " ").slice(0, 400);
 }
 
