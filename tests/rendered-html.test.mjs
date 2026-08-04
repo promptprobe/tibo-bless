@@ -16,10 +16,11 @@ test("server-renders Tibo Bless without starter metadata", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>Tibo Bless — Codex Reset Intelligence<\/title>/i);
+  assert.match(html, /<title>Tibo Bless — Codex Reset Monitor<\/title>/i);
   assert.match(html, /Tibo Bless/);
-  assert.match(html, /Tibo의 축복은/);
+  assert.match(html, /다음 Codex 리셋은/);
   assert.match(html, /CODEX/);
+  assert.doesNotMatch(html, /Juice|Capability|역량/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
 });
 
@@ -29,6 +30,6 @@ test("ships an installable bilingual PWA shell", async () => {
   assert.equal(manifest.short_name, "Tibo Bless");
   assert.equal(manifest.display, "standalone");
   assert.deepEqual(manifest.icons.map((icon) => icon.sizes), ["192x192", "512x512"]);
-  assert.match(serviceWorker, /tibo-bless-v4/);
+  assert.match(serviceWorker, /tibo-bless-v5/);
   assert.match(serviceWorker, /manifest\.webmanifest/);
 });

@@ -38,5 +38,5 @@
     "wrangler": "4.92.0"
   },
   "type": "module",
-  "description": "Bilingual Codex reset, Juice, and capability intelligence monitor."
+  "description": "Simple bilingual Codex reset monitor."
 }

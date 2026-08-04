@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tibos-mercy.cloudy-gull-7634.chatgpt.site"),
-  title: "Tibo Bless — Codex Reset Intelligence",
+  title: "Tibo Bless — Codex Reset Monitor",
   description:
-    "A bilingual monitor for verified Codex resets, reasoning Juice, and capability signals.",
+    "A simple bilingual monitor for verified Codex resets and next-reset probabilities.",
   applicationName: "Tibo Bless",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -27,16 +27,16 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Tibo Bless",
     description:
-      "Verified Codex reset evidence, forecast probabilities, Juice, and capability signals — in Korean and English.",
+      "Verified Codex reset evidence and next-reset probabilities — in Korean and English.",
     type: "website",
     locale: "ko_KR",
     alternateLocale: "en_US",
-    images: [{ url: "/og.png", width: 1734, height: 907, alt: "Tibo Bless — Codex Reset Intelligence" }],
+    images: [{ url: "/og.png", width: 1731, height: 909, alt: "Tibo Bless — Codex Reset Monitor" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Tibo Bless",
-    description: "Bilingual Codex reset intelligence.",
+    description: "Simple bilingual Codex reset monitor.",
     images: ["/og.png"],
   },
 };
