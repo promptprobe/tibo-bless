@@ -7,9 +7,9 @@ test("confirms only completed broad resets", () => {
   assert.equal(classifyPost({ text: "Can we get a Codex reset today?" }).classification, "archived-signal");
 });
 
-test("uses a documented fallback when reset history is insufficient", () => {
+test("uses the documented evidence-free cadence baseline", () => {
   const result = empiricalForecast([{ type: "confirmed-reset", dateTime: "2026-08-01T00:00:00Z" }]);
-  assert.deepEqual([result.score24h, result.score48h, result.method], [14, 26, "fallback"]);
+  assert.deepEqual([result.score24h, result.score48h, result.method], [14, 26, "evidence-free-cadence-baseline"]);
 });
 
 test("applies only unexpired signals created after the latest reset", () => {
@@ -29,4 +29,6 @@ test("applies only unexpired signals created after the latest reset", () => {
   assert.equal(result.activeSignals.length, 1);
   assert.equal(result.adjustment24h, 7);
   assert.equal(result.adjustment48h, 9);
+  assert.equal(result.score24h, 21);
+  assert.equal(result.score48h, 35);
 });

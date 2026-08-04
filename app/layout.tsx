@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   applicationName: "Tibo Bless",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }, { url: "/icon-512.png", sizes: "512x512", type: "image/png" }],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    icon: [{ url: "/tibo-bless-logo.png", sizes: "1254x1254", type: "image/png" }],
+    apple: [{ url: "/tibo-bless-logo.png", sizes: "1254x1254", type: "image/png" }],
   },
   appleWebApp: { capable: true, statusBarStyle: "default", title: "Tibo Bless" },
   openGraph: {

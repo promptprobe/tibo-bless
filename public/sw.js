@@ -1,5 +1,5 @@
-const CACHE_NAME = "tibo-bless-v8";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/og.png"];
+const CACHE_NAME = "tibo-bless-v9";
+const APP_SHELL = ["/", "/manifest.webmanifest", "/tibo-bless-logo.png", "/og.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
