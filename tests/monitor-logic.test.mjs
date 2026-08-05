@@ -7,6 +7,17 @@ test("confirms only completed broad resets", () => {
   assert.equal(classifyPost({ text: "Can we get a Codex reset today?" }).classification, "archived-signal");
 });
 
+test("assigns the documented points to tentative and negative signals", () => {
+  assert.deepEqual(
+    [classifyPost({ text: "Trying, but not sure this time" }).impact24h, classifyPost({ text: "Trying, but not sure this time" }).impact48h],
+    [3, 3],
+  );
+  assert.deepEqual(
+    [classifyPost({ text: "Calm down, calm down" }).impact24h, classifyPost({ text: "Calm down, calm down" }).impact48h],
+    [-2, -3],
+  );
+});
+
 test("uses the documented evidence-free cadence baseline", () => {
   const result = empiricalForecast([{ type: "confirmed-reset", dateTime: "2026-08-01T00:00:00Z" }]);
   assert.deepEqual([result.score24h, result.score48h, result.method], [14, 26, "evidence-free-cadence-baseline"]);

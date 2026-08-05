@@ -15,7 +15,9 @@ Tibo Bless is a simple bilingual monitor for verified global Codex resets and th
 - 최신 확정 리셋 이후 생성되고 아직 유효한 공개 신호만 확률에 반영합니다. / Only unexpired public signals created after the latest reset affect the forecast.
 - 모든 확정 기록은 공개 원문으로 연결됩니다. / Every confirmed record links to its public source.
 - `기쁘다 구주 오셨네` 타임라인은 인물 사진과 함께 은총 기록·예고 신호를 좌우 스와이프로 보여줍니다. / The `Joy to the world` rail shows mercy records and hint signals with profile photos.
-- `은총 레이더`, `구세주 목록`, 쉬운 3단계 산출 근거를 한국어와 영어로 제공합니다. / Includes a bilingual Mercy Radar, Savior List, and plain-language three-step calculation view.
+- 타임라인의 트윗 본문은 한국어·영어 화면 모두 원문 영어로 유지합니다. / Tweet bodies remain in the original English in both language modes.
+- `은총 레이더`, `구세주 목록`, 5개 시그널 규칙과 점수표를 포함한 산출 근거를 제공합니다. / Includes a Mercy Radar, Savior List, and calculation details with five signal rules and a point table.
+- 이메일을 신청하면 D1에 구독을 저장하고, 새 은총 확인 시 Resend로 한 번 알립니다. / Email subscriptions are stored in D1 and receive one Resend alert when new mercy is confirmed.
 
 ## 실행 / Run locally
 
@@ -30,6 +32,12 @@ npm run dev
 `XAI_API_KEY`는 로컬 환경 또는 Sites의 비밀 환경값으로만 설정하세요. SpaceXAI X Search 결과는 D1에 저장되며 4시간마다 갱신됩니다. 실제 키를 저장소에 커밋하지 마세요.
 
 Set `XAI_API_KEY` only in the local environment or as a Sites secret. SpaceXAI X Search results are persisted in D1 and refreshed every four hours. Never commit the real key.
+
+이메일 발송에는 `RESEND_API_KEY`, Resend에서 인증한 `ALERT_FROM_EMAIL`, 배포 주소인 `PUBLIC_SITE_URL`이 필요합니다. 메일 본문은 다음 문장으로 고정됩니다.
+
+> 티보가 은총을 하사하시니, 불쌍한 중생이여 미처 하지못한 작업을 마무리 해보거라
+
+Email delivery requires `RESEND_API_KEY`, a Resend-verified `ALERT_FROM_EMAIL`, and the deployed `PUBLIC_SITE_URL`.
 
 검증 / Validation:
 
@@ -47,6 +55,7 @@ app/monitor-data.ts    public reset evidence snapshot
 lib/monitor-logic.js   classification and forecast logic
 lib/xai-monitor.ts     four-hour SpaceXAI refresh and D1 persistence
 lib/xai-normalize.js   citation and evidence validation
+lib/email-alerts.ts    durable email subscriptions and mercy delivery
 public/                PWA metadata, icons, and social preview
 public/people/         locally bundled public profile images
 tests/                 logic and rendered-output tests

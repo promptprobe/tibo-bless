@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- profile photos are locally bundled public assets. */
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { buildForecast } from "@/lib/monitor-logic";
 import { monitorData, type Localized, type MonitorSnapshot, type ResetEvent, type Signal } from "./monitor-data";
 
@@ -21,7 +21,7 @@ const labels = {
     language: "EN",
     switchLanguage: "영어로 보기",
     heroTitle: "티보의 다음\n은총은 언제?",
-    lastReset: "마지막 은총 후",
+    lastReset: "마지막 은총으로부터",
     lastResetHint: "마지막 은총 날짜",
     nextReset: "은총 받을 확률",
     hours24: "24시간 안",
@@ -31,16 +31,34 @@ const labels = {
     source: "원문 보기",
     analysis: "산출 근거 보기",
     closeAnalysis: "산출 근거 닫기",
-    analysisTitle: "은총 확률은 이렇게 나왔어요",
-    analysisIntro: "확인된 은총의 흐름을 먼저 보고, 마지막 은총 뒤에 나온 새 신호만 반영해요.",
+    analysisTitle: "은총 확률 산출 방법",
+    analysisIntro: "확인된 은총 기록에서 기본 확률을 잡고, 마지막 은총 뒤 48시간 안에 나온 구세주 시그널만 점수로 반영해요.",
     baseline: "기본 확률",
     baselineBody: "새 신호가 없다면 24시간 14%, 48시간 26%에서 시작해요.",
     signalAdjustment: "새로운 예고",
     signalBody: "마지막 은총 뒤에 나온 아직 유효한 신호만 더하거나 빼요.",
     finalEstimate: "최종 확률",
     finalBody: "기본 확률과 신호 점수를 합쳐 지금의 24·48시간 확률을 보여줘요.",
+    pointRules: "시그널 포인트 산정 원리",
+    pointRulePositive: "은총 시점 예고",
+    pointRulePositiveBody: "리셋과 미래 시점이 함께 명시된 계시",
+    pointRuleTentative: "가능성 암시",
+    pointRuleTentativeBody: "시도 중이지만 확정하지 않은 답글",
+    pointRuleNegative: "부정·진정 신호",
+    pointRuleNegativeBody: "리셋을 부정하거나 기대를 낮추는 답글",
+    pointRuleNeutral: "요청·농담",
+    pointRuleNeutralBody: "구세주의 의도가 확인되지 않은 단순 요청",
+    pointRuleReset: "은총 확정",
+    pointRuleResetBody: "기존 시그널을 비우고 기본 확률의 시계를 다시 시작",
+    scoreWindow: "유효 시간",
+    scoreWindowBody: "마지막 은총 이후 작성된 시그널을 48시간 동안만 반영합니다.",
+    scoreFormula: "최종 확률 = 기본 확률 + 유효 시그널 포인트",
     timeline: "기쁘다 구주 오셨네",
     timelineBody: "좌우로 넘겨 티보의 은총을 확인해 보세요.",
+    timelineLatest: "최근 은총",
+    timelineConfirmed: "확인된 은총",
+    timelineSignal: "확률 변경 시그널",
+    timelineWindow: "기록 · 30일 범위",
     previous: "이전 기록",
     next: "다음 기록",
     replySignal: "X 예고 신호",
@@ -57,6 +75,14 @@ const labels = {
     everyFourHours: "4시간마다",
     sources: "구세주 목록",
     referenceAccounts: "참고 계정",
+    alertTitle: "은총 소식 받기",
+    alertBody: "다음 은총이 확인되면 이메일로 한 번 알려드려요.",
+    alertPlaceholder: "you@example.com",
+    alertSubmit: "이메일 알림 신청",
+    alertSubmitting: "신청 중…",
+    alertSuccess: "신청했어요. 다음 은총부터 알려드릴게요.",
+    alertPendingSetup: "주소를 저장했어요. 발송 연결이 완료되면 다음 은총부터 알려드려요.",
+    alertError: "신청하지 못했어요. 잠시 뒤 다시 시도해 주세요.",
     snapshot: "데이터 기준",
     disclaimer: "OpenAI와 관련 없는 독립 프로젝트예요.",
     now: "현재",
@@ -87,8 +113,26 @@ const labels = {
     signalBody: "Only active hints posted after the last mercy can move the chance up or down.",
     finalEstimate: "Final chance",
     finalBody: "Combine the base chance and hint points into the current 24h and 48h chance.",
+    pointRules: "How signal points are assigned",
+    pointRulePositive: "Timed mercy hint",
+    pointRulePositiveBody: "A reset and a future time are stated together",
+    pointRuleTentative: "Tentative hint",
+    pointRuleTentativeBody: "Tibo is trying but does not confirm a reset",
+    pointRuleNegative: "Negative signal",
+    pointRuleNegativeBody: "A reply denies a reset or lowers expectations",
+    pointRuleNeutral: "Request or joke",
+    pointRuleNeutralBody: "A request with no confirmed intent from the savior",
+    pointRuleReset: "Confirmed mercy",
+    pointRuleResetBody: "Clear old signals and restart the base-chance clock",
+    scoreWindow: "Active window",
+    scoreWindowBody: "Only signals posted after the latest mercy remain active, for 48 hours.",
+    scoreFormula: "Final chance = base chance + active signal points",
     timeline: "Joy to the world, mercy has come",
     timelineBody: "Swipe sideways to follow Tibo’s moments of mercy.",
+    timelineLatest: "Latest mercy",
+    timelineConfirmed: "Confirmed mercy",
+    timelineSignal: "Forecast-changing signal",
+    timelineWindow: "records · 30-day window",
     previous: "Previous entry",
     next: "Next entry",
     replySignal: "X forecast signal",
@@ -105,6 +149,14 @@ const labels = {
     everyFourHours: "Every 4h",
     sources: "Savior list",
     referenceAccounts: "Reference accounts",
+    alertTitle: "Get mercy alerts",
+    alertBody: "Receive one email when the next mercy is confirmed.",
+    alertPlaceholder: "you@example.com",
+    alertSubmit: "Subscribe by email",
+    alertSubmitting: "Subscribing…",
+    alertSuccess: "Subscribed. We’ll email you after the next mercy.",
+    alertPendingSetup: "Saved. Alerts will begin when mail delivery is connected.",
+    alertError: "Could not subscribe. Please try again shortly.",
     snapshot: "Data as of",
     disclaimer: "An independent project not affiliated with OpenAI.",
     now: "Now",
@@ -115,10 +167,10 @@ const labels = {
 } as const;
 
 const howItWorks: { title: Localized; body: Localized }[] = [
-  { title: { ko: "공개 신호 수집", en: "Collect public signals" }, body: { ko: "주요 계정의 게시물과 답글을 모아요.", en: "Gather posts and replies from key accounts." } },
-  { title: { ko: "뜻을 구분", en: "Separate the meaning" }, body: { ko: "실제 은총, 예고, 농담과 요청을 나눠요.", en: "Distinguish mercy, hints, jokes, and requests." } },
-  { title: { ko: "확률 업데이트", en: "Update the chance" }, body: { ko: "기본 확률에 아직 유효한 새 신호만 더하거나 빼요.", en: "Add or subtract only active new hints from the base chance." } },
-  { title: { ko: "원문 보존", en: "Preserve the source" }, body: { ko: "모든 판단에서 원문을 바로 확인할 수 있어요.", en: "Keep every original source one tap away." } },
+  { title: { ko: "구세주 시그널 수집", en: "Collect savior signals" }, body: { ko: "구세주의 계시를 모아요.", en: "Gather revelations from the savior." } },
+  { title: { ko: "계시 해석", en: "Interpret the revelation" }, body: { ko: "은총인지 아닌지 구분해요.", en: "Decide whether it is mercy or not." } },
+  { title: { ko: "확률 업데이트", en: "Update the chance" }, body: { ko: "은총 가능성을 업데이트 해요.", en: "Update the chance of mercy." } },
+  { title: { ko: "은총 기록 남기기", en: "Preserve the mercy" }, body: { ko: "구세주의 은총을 고이 간직해요.", en: "Keep the savior’s mercy safe." } },
 ];
 
 const monitoredSources = [
@@ -154,9 +206,22 @@ function formatUtcDate(value: string, language: Language, includeTime = true) {
     : dateLabel;
 }
 
+function formatTimelineDate(value: string, language: Language) {
+  const date = new Date(value);
+  const month = date.getUTCMonth();
+  return {
+    day: language === "ko"
+      ? `${month + 1}월 ${date.getUTCDate()}일`
+      : `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][month]} ${String(date.getUTCDate()).padStart(2, "0")}`,
+    time: `${String(date.getUTCHours()).padStart(2, "0")}:${String(date.getUTCMinutes()).padStart(2, "0")} UTC`,
+  };
+}
+
 export function TiboBless() {
   const [language, setLanguage] = useState<Language>("ko");
   const [analysisOpen, setAnalysisOpen] = useState(false);
+  const [alertEmail, setAlertEmail] = useState("");
+  const [alertStatus, setAlertStatus] = useState<"idle" | "submitting" | "success" | "pending" | "error">("idle");
   const [liveData, setLiveData] = useState<MonitorSnapshot>(monitorData);
   const [liveMeta, setLiveMeta] = useState<LiveMonitorMeta | null>(null);
   const copy = labels[language];
@@ -257,6 +322,23 @@ export function TiboBless() {
     setSelectedTimeline((current) => Math.min(timeline.length - 1, Math.max(0, current + direction)));
   };
 
+  const subscribeToAlerts = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAlertStatus("submitting");
+    try {
+      const response = await fetch("/api/alerts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: alertEmail }),
+      });
+      const result = await response.json() as { ok?: boolean; mailReady?: boolean };
+      if (!response.ok || !result.ok) throw new Error("Subscription failed");
+      setAlertStatus(result.mailReady ? "success" : "pending");
+    } catch {
+      setAlertStatus("error");
+    }
+  };
+
   const syncTimelineSelection = () => {
     if (!timelineReady.current) return;
     const viewport = timelineViewport.current;
@@ -332,6 +414,34 @@ export function TiboBless() {
           </aside>
         </section>
 
+        <section className="alert-panel container" aria-labelledby="alert-title">
+          <div>
+            <p id="alert-title">{copy.alertTitle}</p>
+            <span>{copy.alertBody}</span>
+          </div>
+          <form onSubmit={subscribeToAlerts}>
+            <label className="sr-only" htmlFor="alert-email">Email</label>
+            <input
+              id="alert-email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              required
+              placeholder={copy.alertPlaceholder}
+              value={alertEmail}
+              onChange={(event) => { setAlertEmail(event.target.value); setAlertStatus("idle"); }}
+            />
+            <button type="submit" disabled={alertStatus === "submitting"}>
+              {alertStatus === "submitting" ? copy.alertSubmitting : copy.alertSubmit}
+            </button>
+          </form>
+          {alertStatus !== "idle" && alertStatus !== "submitting" && (
+            <small role="status" className={alertStatus === "error" ? "is-error" : ""}>
+              {alertStatus === "success" ? copy.alertSuccess : alertStatus === "pending" ? copy.alertPendingSetup : copy.alertError}
+            </small>
+          )}
+        </section>
+
         <section className="timeline-section" id="timeline">
           <div className="container section-heading">
             <div>
@@ -340,25 +450,40 @@ export function TiboBless() {
             </div>
             <span>{timeline.length}</span>
           </div>
+          <div className="container timeline-meta" aria-label={copy.timelineWindow}>
+            <span className="is-latest">● {copy.timelineLatest} · {formatTimelineDate(latest.dateTime, language).day}</span>
+            <span>● {copy.timelineConfirmed}</span>
+            <span className="is-signal">○ {copy.timelineSignal}</span>
+            <b>{timeline.length} {copy.timelineWindow}</b>
+          </div>
           <div className="timeline-shell">
             <button className="timeline-nav timeline-nav-left" type="button" aria-label={copy.previous} disabled={selectedTimeline === 0} onClick={() => moveTimeline(-1)}>
               <ChevronIcon direction="left" />
             </button>
             <div className="timeline-viewport" ref={timelineViewport} onScroll={syncTimelineSelection}>
               <div className="timeline-track">
-                {timeline.map((entry, index) => (
-                  <article
-                    key={entry.item.id}
-                    className={`timeline-card ${entry.kind === "signal" ? "is-signal" : "is-reset"} ${index === selectedTimeline ? "is-selected" : ""}`}
-                    ref={(element) => { timelineCards.current[index] = element; }}
-                  >
-                    {entry.kind === "reset" ? (
-                      <ResetTimelineCard event={entry.item} language={language} copy={copy} formatDate={formatDate} />
-                    ) : (
-                      <SignalTimelineCard signal={entry.item} language={language} copy={copy} formatDate={formatDate} />
-                    )}
-                  </article>
-                ))}
+                {timeline.map((entry, index) => {
+                  const dateTime = entry.kind === "reset" ? entry.item.dateTime : entry.item.createdAt;
+                  const timelineDate = formatTimelineDate(dateTime, language);
+                  return (
+                    <div
+                      className={`timeline-entry ${index === selectedTimeline ? "is-selected" : ""}`}
+                      key={entry.item.id}
+                      ref={(element) => { timelineCards.current[index] = element; }}
+                    >
+                      <article
+                        className={`timeline-card ${entry.kind === "signal" ? "is-signal" : "is-reset"} ${index === selectedTimeline ? "is-selected" : ""}`}
+                      >
+                        {entry.kind === "reset" ? (
+                          <ResetTimelineCard event={entry.item} language={language} copy={copy} formatDate={formatDate} />
+                        ) : (
+                          <SignalTimelineCard signal={entry.item} copy={copy} formatDate={formatDate} />
+                        )}
+                      </article>
+                      <time dateTime={dateTime}><i /><strong>{timelineDate.day}</strong><small>{timelineDate.time}</small></time>
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <button className="timeline-nav timeline-nav-right" type="button" aria-label={copy.next} disabled={selectedTimeline === timeline.length - 1} onClick={() => moveTimeline(1)}>
@@ -416,12 +541,6 @@ export function TiboBless() {
         <span>{copy.disclaimer}</span>
       </footer>
 
-      <nav className="mobile-dock" aria-label={copy.mobileNav}>
-        <a className="is-active" href="#status"><NowIcon /><span>{copy.now}</span></a>
-        <a href="#timeline"><HistoryIcon /><span>{copy.history}</span></a>
-        <a href="#info"><InfoIcon /><span>{copy.info}</span></a>
-      </nav>
-
       {analysisOpen && (
         <div className="analysis-backdrop" role="presentation" onMouseDown={(event) => {
           if (event.currentTarget === event.target) setAnalysisOpen(false);
@@ -436,6 +555,18 @@ export function TiboBless() {
               <article><span>2</span><div><b>{copy.signalAdjustment}</b><p>{copy.signalBody}</p><strong>24h {signed(forecast.adjustment24h)}pt · 48h {signed(forecast.adjustment48h)}pt</strong></div></article>
               <article><span>3</span><div><b>{copy.finalEstimate}</b><p>{copy.finalBody}</p><strong>24h {forecast.score24h}% · 48h {forecast.score48h}%</strong></div></article>
             </div>
+            <section className="point-rules" aria-labelledby="point-rules-title">
+              <h3 id="point-rules-title">{copy.pointRules}</h3>
+              <div className="point-rule-list">
+                <article><span><b>{copy.pointRulePositive}</b><small>{copy.pointRulePositiveBody}</small></span><strong>24h +21pt · 48h +17pt</strong></article>
+                <article><span><b>{copy.pointRuleTentative}</b><small>{copy.pointRuleTentativeBody}</small></span><strong>24h +3pt · 48h +3pt</strong></article>
+                <article><span><b>{copy.pointRuleNegative}</b><small>{copy.pointRuleNegativeBody}</small></span><strong>24h −2pt · 48h −3pt</strong></article>
+                <article><span><b>{copy.pointRuleNeutral}</b><small>{copy.pointRuleNeutralBody}</small></span><strong>0pt</strong></article>
+                <article><span><b>{copy.pointRuleReset}</b><small>{copy.pointRuleResetBody}</small></span><strong>RESET</strong></article>
+              </div>
+              <p><b>{copy.scoreWindow}</b> · {copy.scoreWindowBody}</p>
+              <code>{copy.scoreFormula}</code>
+            </section>
           </section>
         </div>
       )}
@@ -462,17 +593,16 @@ function ResetTimelineCard({ event, language, copy, formatDate }: {
       </div>
       <div className="timeline-card-body">
         <h3>{local(event.title, language)}</h3>
-        <p>{local(event.reason, language)}</p>
-        <small>{copy.scope} · {local(event.scope, language)}</small>
+        <p>{event.text}</p>
+        <dl><div><dt>{copy.scope}</dt><dd>{local(event.scope, language)}</dd></div><div><dt>Source</dt><dd>{event.sourceUrl.includes("x.com/") ? `${event.author} on X` : event.author}</dd></div></dl>
       </div>
       <a className="timeline-source" href={event.sourceUrl} target="_blank" rel="noreferrer">{copy.source}<span>↗</span></a>
     </>
   );
 }
 
-function SignalTimelineCard({ signal, language, copy, formatDate }: {
+function SignalTimelineCard({ signal, copy, formatDate }: {
   signal: Signal;
-  language: Language;
   copy: typeof labels[Language];
   formatDate: (date: string, includeTime?: boolean) => string;
 }) {
@@ -483,24 +613,12 @@ function SignalTimelineCard({ signal, language, copy, formatDate }: {
         <span><strong>{signal.author}</strong><small>{signal.handle} · {formatDate(signal.createdAt)}</small></span>
         <b className="signal-badge">{copy.replySignal}</b>
       </div>
-      <div className="parent-post"><span>{copy.parentPost}</span><p>{local(signal.parentText, language)}</p></div>
+      <div className="parent-post"><span>{copy.parentPost}</span><p>{signal.parentText.en}</p></div>
       <blockquote>“{signal.text}”</blockquote>
       <div className="signal-impact"><span>{copy.impact}</span><strong>24h {signed(signal.impact24h)}pt</strong><strong>48h {signed(signal.impact48h)}pt</strong></div>
       <a className="timeline-source" href={signal.sourceUrl} target="_blank" rel="noreferrer">{copy.source}<span>↗</span></a>
     </>
   );
-}
-
-function NowIcon() {
-  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M5 10.5 12 5l7 5.5V19H5v-8.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /><path d="M9.5 19v-5h5v5" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /></svg>;
-}
-
-function HistoryIcon() {
-  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M5 7h14M5 12h14M5 17h9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
-}
-
-function InfoIcon() {
-  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" /><path d="M12 11v5M12 8h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>;
 }
 
 function ArrowIcon() {

@@ -1,4 +1,5 @@
 import { ALLOWED_HANDLES, extractVerifiedDiscoveries, getStatusId } from "./xai-normalize.js";
+import { classifyPost } from "./monitor-logic.js";
 import {
   monitorData,
   type MonitorSnapshot,
@@ -278,11 +279,12 @@ function toSignal(item: Discovery): Signal {
     : item.kind === "negative_signal"
       ? "negative-signal"
       : "archived-signal";
+  const deterministic = classifyPost({ text: item.text });
   const impacts = classification === "upward-signal"
     ? { impact24h: 21, impact48h: 17 }
     : classification === "negative-signal"
       ? { impact24h: -2, impact48h: -3 }
-      : { impact24h: 0, impact48h: 0 };
+      : { impact24h: deterministic.impact24h, impact48h: deterministic.impact48h };
 
   return {
     id: `xai-${statusId}`,
