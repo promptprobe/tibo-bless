@@ -421,14 +421,19 @@ export function TiboBless() {
           <img className="brand-logo" src="/tibo-bless-logo.png" alt="" width="52" height="52" />
           <strong>{copy.brand}</strong>
         </Link>
-        <button
-          className="language-button"
-          type="button"
-          aria-label={copy.switchLanguage}
-          onClick={() => setLanguage((current) => current === "ko" ? "en" : "ko")}
-        >
-          {copy.language}
-        </button>
+        <div className="top-nav-actions">
+          <button className="install-button" type="button" onClick={requestInstall}>
+            {copy.installAction}
+          </button>
+          <button
+            className="language-button"
+            type="button"
+            aria-label={copy.switchLanguage}
+            onClick={() => setLanguage((current) => current === "ko" ? "en" : "ko")}
+          >
+            {copy.language}
+          </button>
+        </div>
       </header>
 
       <main>
@@ -570,27 +575,29 @@ export function TiboBless() {
 
         <section className="info-section" id="info">
           <div className="container info-stack">
-            <div className="info-block">
-              <div className="section-heading compact">
-                <div><p>{copy.how}</p></div>
+            <div className="info-feature-grid">
+              <div className="info-block prediction-block">
+                <div className="section-heading compact">
+                  <div><p>{copy.how}</p></div>
+                </div>
+                <ol className="how-grid">
+                  {howItWorks.map((step, index) => (
+                    <li key={step.title.en}><span>{index + 1}</span><div><h3>{local(step.title, language)}</h3><p>{local(step.body, language)}</p></div></li>
+                  ))}
+                </ol>
               </div>
-              <ol className="how-grid">
-                {howItWorks.map((step, index) => (
-                  <li key={step.title.en}><span>{index + 1}</span><div><h3>{local(step.title, language)}</h3><p>{local(step.body, language)}</p></div></li>
-                ))}
-              </ol>
-            </div>
 
-            <div className="info-block">
-              <div className="section-heading compact">
-                <div><p>{copy.coverage}</p></div>
+              <div className="info-block radar-block">
+                <div className="section-heading compact">
+                  <div><p>{copy.coverage}</p></div>
+                </div>
+                <dl className="coverage-grid">
+                  <div><dt>{copy.evidence}</dt><dd>{liveData.events.length + liveData.signals.length}</dd></div>
+                  <div><dt>{copy.resetEvents}</dt><dd>{liveData.events.length}</dd></div>
+                  <div><dt>{copy.archive}</dt><dd>{archiveDays}<small>{copy.days}</small></dd></div>
+                  <div><dt>{copy.refresh}</dt><dd className="coverage-word">{copy.everyFourHours}</dd></div>
+                </dl>
               </div>
-              <dl className="coverage-grid">
-                <div><dt>{copy.evidence}</dt><dd>{liveData.events.length + liveData.signals.length}</dd></div>
-                <div><dt>{copy.resetEvents}</dt><dd>{liveData.events.length}</dd></div>
-                <div><dt>{copy.archive}</dt><dd>{archiveDays}<small>{copy.days}</small></dd></div>
-                <div><dt>{copy.refresh}</dt><dd className="coverage-word">{copy.everyFourHours}</dd></div>
-              </dl>
             </div>
 
             <div className="info-block sources-block">

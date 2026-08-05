@@ -58,6 +58,8 @@ test("server-renders Tibo Bless without starter metadata", async () => {
   assert.match(app, /시간이 흐른다고 자동으로 오르지는 않아요/);
   assert.match(app, /className="signal-scroll"/);
   assert.match(app, /beforeinstallprompt/);
+  assert.match(html, /class="top-nav-actions"/);
+  assert.match(html, /class="info-feature-grid"/);
   assert.match(html, /I have reset usage limits for Codex and ChatGPT Work\. Enjoy\./);
   assert.doesNotMatch(html, /class="mobile-dock"/);
   assert.doesNotMatch(html, /CODEX RESET WATCH/);
@@ -81,7 +83,7 @@ test("ships an installable bilingual PWA shell", async () => {
   assert.deepEqual([icon192.readUInt32BE(16), icon192.readUInt32BE(20)], [192, 192]);
   assert.deepEqual([icon512.readUInt32BE(16), icon512.readUInt32BE(20)], [512, 512]);
   assert.deepEqual([appleIcon.readUInt32BE(16), appleIcon.readUInt32BE(20)], [180, 180]);
-  assert.match(serviceWorker, /tibo-bless-v13/);
+  assert.match(serviceWorker, /tibo-bless-v14/);
   assert.match(serviceWorker, /tibo-bless-logo\.png/);
   assert.match(serviceWorker, /tibo-bless-icon-192\.png/);
   assert.match(serviceWorker, /tibo-bless-apple-touch-icon\.png/);

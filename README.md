@@ -17,6 +17,8 @@ Tibo Bless is a simple bilingual monitor for verified global Codex resets and th
 - `기쁘다 구주 오셨네` 타임라인은 인물 사진과 함께 은총 기록·예고 신호를 좌우 스와이프로 보여줍니다. / The `Joy to the world` rail shows mercy records and hint signals with profile photos.
 - 타임라인의 트윗 본문은 한국어·영어 화면 모두 원문 영어로 유지합니다. / Tweet bodies remain in the original English in both language modes.
 - `은총 레이더`, `구세주 목록`, 5개 시그널 규칙과 점수표를 포함한 산출 근거를 제공합니다. / Includes a Mercy Radar, Savior List, and calculation details with five signal rules and a point table.
+- PC에서는 `은총 예측 원리`와 `은총 레이더`를 한 행에 배치하고, 모바일에서는 기존 세로 흐름을 유지합니다. / On desktop, Prediction Principles and Mercy Radar share one row; mobile keeps the original vertical flow.
+- PC 헤더의 `홈 화면에 추가` 버튼은 브라우저의 PWA 설치 프롬프트를 엽니다. / The desktop `Add to home` button opens the browser's PWA install prompt.
 - 이메일을 신청하면 D1에 구독을 저장하고, 새 은총 확인 시 Resend로 한 번 알립니다. / Email subscriptions are stored in D1 and receive one Resend alert when new mercy is confirmed.
 
 ## 실행 / Run locally

@@ -1,4 +1,4 @@
-const CACHE_NAME = "tibo-bless-v13";
+const CACHE_NAME = "tibo-bless-v14";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",

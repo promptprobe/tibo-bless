@@ -102,8 +102,6 @@ const worker = {
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil((async () => {
-      // Cron already runs every four hours. Force the scheduled search so a
-      // recent visitor-triggered refresh cannot make this fixed slot no-op.
       const result = await refreshMonitorSnapshot(env, { force: true });
       await sendMercyAlerts(env, result.snapshot);
     })());
