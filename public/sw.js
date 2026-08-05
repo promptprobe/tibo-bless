@@ -1,8 +1,11 @@
-const CACHE_NAME = "tibo-bless-v12";
+const CACHE_NAME = "tibo-bless-v13";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
   "/tibo-bless-logo.png",
+  "/tibo-bless-icon-192.png",
+  "/tibo-bless-icon-512.png",
+  "/tibo-bless-apple-touch-icon.png",
   "/og.png",
   "/people/tibo.jpg",
   "/people/openai.jpg",

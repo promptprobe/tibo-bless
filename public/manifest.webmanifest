@@ -2,14 +2,17 @@
   "name": "티보의 은총 — Tibo Bless",
   "short_name": "Tibo Bless",
   "description": "A simple bilingual monitor for verified Codex resets and next-reset probabilities.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#ebe8e4",
   "theme_color": "#ebe8e4",
   "lang": "ko",
   "categories": ["utilities", "productivity"],
   "icons": [
-    { "src": "/tibo-bless-logo.png", "sizes": "1254x1254", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/tibo-bless-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/tibo-bless-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }

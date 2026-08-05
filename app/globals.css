@@ -171,6 +171,22 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ink); outline-o
 .alert-panel > small { color: #38664c; font-size: 10px; line-height: 1.45; }
 .alert-panel > small.is-error { color: #a23a2c; }
 
+.install-panel { display: grid; margin-top: -34px; margin-bottom: 48px; padding: 15px; grid-template-columns: 54px minmax(0,1fr); align-items: center; gap: 12px; border: 1px solid rgba(255,255,255,.82); border-radius: 25px; background: rgba(255,255,255,.48); box-shadow: 0 14px 38px rgba(37,33,29,.06); }
+.install-panel > img { display: block; width: 54px; height: 54px; border-radius: 17px; box-shadow: 0 7px 18px rgba(37,33,29,.12); }
+.install-copy { display: grid; gap: 4px; }
+.install-copy p { margin: 0; font-size: 14px; font-weight: 760; letter-spacing: -.025em; }
+.install-copy span { color: var(--muted); font-size: 10px; line-height: 1.5; word-break: keep-all; }
+.install-panel > button { min-height: 46px; grid-column: 1 / -1; border: 0; border-radius: 15px; background: var(--ink); color: #fff; cursor: pointer; font-size: 11px; font-weight: 740; }
+.install-help { display: grid; grid-column: 1 / -1; padding: 13px 14px; gap: 10px; border-radius: 16px; background: rgba(255,255,255,.7); }
+.install-help[hidden] { display: none; }
+.install-help p { display: grid; margin: 0; grid-template-columns: 58px minmax(0,1fr); gap: 8px; }
+.install-help b { font-size: 10px; }
+.install-help span { color: var(--muted); font-size: 10px; line-height: 1.5; }
+
+@media (display-mode:standalone) {
+  .install-panel { display: none; }
+}
+
 .timeline-section { padding: 52px 0 64px; border-top: 1px solid rgba(255,255,255,.7); background: rgba(248,246,243,.37); }
 .section-heading { display: flex; margin-bottom: 24px; align-items: flex-end; justify-content: space-between; gap: 20px; }
 .section-heading p { margin: 0 0 8px; font-size: 27px; font-weight: 740; line-height: 1.1; letter-spacing: -.05em; }
@@ -328,6 +344,9 @@ footer { display: grid; padding-top: 28px; padding-bottom: 26px; gap: 7px; borde
   .alert-panel { margin-top: -32px; margin-bottom: 64px; padding: 20px 22px; grid-template-columns: minmax(0,1fr) minmax(420px,.8fr); align-items: center; gap: 22px; }
   .alert-panel form { align-self: center; }
   .alert-panel > small { grid-column: 2; margin-top: -14px; }
+  .install-panel { margin-top: -50px; margin-bottom: 64px; padding: 16px 18px; grid-template-columns: 54px minmax(0,1fr) auto; gap: 14px; }
+  .install-panel > button { min-width: 150px; grid-column: auto; padding-inline: 18px; }
+  .install-help { grid-column: 2 / -1; }
   .forecast-heading { padding: 28px 28px 22px; }
   .probability { padding: 34px 28px 30px; }
   .probability > strong { font-size: 64px; }

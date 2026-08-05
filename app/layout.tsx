@@ -1,5 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  // vinext currently omits Viewport.viewportFit, so keep the valid token in
+  // the serialized width value until its metadata shim supports the field.
+  width: "device-width, viewport-fit=cover",
+  initialScale: 1,
+  themeColor: "#ebe8e4",
+  colorScheme: "light",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tibos-mercy.cloudy-gull-7634.chatgpt.site"),
@@ -9,8 +18,11 @@ export const metadata: Metadata = {
   applicationName: "Tibo Bless",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: [{ url: "/tibo-bless-logo.png", sizes: "1254x1254", type: "image/png" }],
-    apple: [{ url: "/tibo-bless-logo.png", sizes: "1254x1254", type: "image/png" }],
+    icon: [
+      { url: "/tibo-bless-icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/tibo-bless-icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/tibo-bless-apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   appleWebApp: { capable: true, statusBarStyle: "default", title: "Tibo Bless" },
   openGraph: {
