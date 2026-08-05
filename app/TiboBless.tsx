@@ -24,17 +24,17 @@ const labels = {
     lastReset: "마지막 은총으로부터",
     lastResetHint: "마지막 은총 날짜",
     nextReset: "은총 받을 확률",
-    hours24: "24시간 안",
-    hours48: "48시간 안",
+    hours24: "24시간 이내",
+    hours48: "48시간 이내",
     latestEvidence: "은총을 하사하시니",
     confirmed: "은총 기록",
     source: "원문 보기",
     analysis: "산출 근거 보기",
     closeAnalysis: "산출 근거 닫기",
     analysisTitle: "은총 확률 산출 방법",
-    analysisIntro: "확인된 은총 기록에서 기본 확률을 잡고, 마지막 은총 뒤 48시간 안에 나온 구세주 시그널만 점수로 반영해요.",
-    baseline: "기본 확률",
-    baselineBody: "새 신호가 없다면 24시간 14%, 48시간 26%에서 시작해요.",
+    analysisIntro: "새 신호가 없을 때의 고정 기준값에, 마지막 은총 이후 48시간 동안 유효한 구세주 시그널만 더하거나 빼요.",
+    baseline: "고정 기준 확률",
+    baselineBody: "24시간 14%, 48시간 26%는 레퍼런스 분석에서 정한 고정 기준값이에요. 기록이 늘거나 시간이 흐른다고 자동으로 오르지는 않아요.",
     signalAdjustment: "새로운 예고",
     signalBody: "마지막 은총 뒤에 나온 아직 유효한 신호만 더하거나 빼요.",
     finalEstimate: "최종 확률",
@@ -49,10 +49,11 @@ const labels = {
     pointRuleNeutral: "요청·농담",
     pointRuleNeutralBody: "구세주의 의도가 확인되지 않은 단순 요청",
     pointRuleReset: "은총 확정",
-    pointRuleResetBody: "기존 시그널을 비우고 기본 확률의 시계를 다시 시작",
+    pointRuleResetBody: "기존 시그널을 비우고 14%·26% 기준값으로 돌아감",
     scoreWindow: "유효 시간",
-    scoreWindowBody: "마지막 은총 이후 작성된 시그널을 48시간 동안만 반영합니다.",
+    scoreWindowBody: "시간 경과 자체에는 점수를 더하지 않으며, 마지막 은총 이후 작성된 시그널만 48시간 동안 반영합니다.",
     scoreFormula: "최종 확률 = 기본 확률 + 유효 시그널 포인트",
+    pointDefinition: "pt는 퍼센트포인트예요. 예: 14%에 +3pt를 더하면 17%입니다.",
     timeline: "기쁘다 구주 오셨네",
     timelineBody: "좌우로 넘겨 티보의 은총을 확인해 보세요.",
     timelineLatest: "최근 은총",
@@ -63,6 +64,7 @@ const labels = {
     next: "다음 기록",
     replySignal: "X 예고 신호",
     parentPost: "답글을 단 글",
+    signalDetails: "답글 전체 내용",
     impact: "당시 영향",
     scope: "대상",
     how: "은총 예측 원리",
@@ -76,7 +78,7 @@ const labels = {
     sources: "구세주 목록",
     referenceAccounts: "참고 계정",
     alertTitle: "은총 소식 받기",
-    alertBody: "다음 은총이 확인되면 이메일로 한 번 알려드려요.",
+    alertBody: "티보의 은총을 이메일로 전달받기",
     alertPlaceholder: "you@example.com",
     alertSubmit: "이메일 알림 신청",
     alertSubmitting: "신청 중…",
@@ -106,9 +108,9 @@ const labels = {
     analysis: "View analysis",
     closeAnalysis: "Close analysis",
     analysisTitle: "How we got this chance",
-    analysisIntro: "Start with the flow of confirmed mercy, then apply only new hints since the last one.",
-    baseline: "Base chance",
-    baselineBody: "With no new hint, start at 14% for 24 hours and 26% for 48 hours.",
+    analysisIntro: "Start from fixed no-signal reference values, then add or subtract only savior signals that remain active for 48 hours after the latest mercy.",
+    baseline: "Fixed baseline",
+    baselineBody: "The 14% within 24 hours and 26% within 48 hours are fixed values adopted from the reference analysis. More records or elapsed time do not raise them automatically.",
     signalAdjustment: "New hints",
     signalBody: "Only active hints posted after the last mercy can move the chance up or down.",
     finalEstimate: "Final chance",
@@ -123,10 +125,11 @@ const labels = {
     pointRuleNeutral: "Request or joke",
     pointRuleNeutralBody: "A request with no confirmed intent from the savior",
     pointRuleReset: "Confirmed mercy",
-    pointRuleResetBody: "Clear old signals and restart the base-chance clock",
+    pointRuleResetBody: "Clear old signals and return to the 14% and 26% baseline",
     scoreWindow: "Active window",
-    scoreWindowBody: "Only signals posted after the latest mercy remain active, for 48 hours.",
+    scoreWindowBody: "Elapsed time adds no points. Only signals posted after the latest mercy remain active, for 48 hours.",
     scoreFormula: "Final chance = base chance + active signal points",
+    pointDefinition: "pt means percentage points. For example, 14% + 3pt = 17%.",
     timeline: "Joy to the world, mercy has come",
     timelineBody: "Swipe sideways to follow Tibo’s moments of mercy.",
     timelineLatest: "Latest mercy",
@@ -137,6 +140,7 @@ const labels = {
     next: "Next entry",
     replySignal: "X forecast signal",
     parentPost: "Post being replied to",
+    signalDetails: "Full reply content",
     impact: "Impact at the time",
     scope: "Scope",
     how: "How it works",
@@ -174,7 +178,7 @@ const howItWorks: { title: Localized; body: Localized }[] = [
 ];
 
 const monitoredSources = [
-  { name: "Tibo Sottiaux", handle: "@thsottiaux", avatar: "/people/tibo.jpg?v=10", role: { ko: "최우선 구세주", en: "Priority savior" }, url: "https://x.com/thsottiaux" },
+  { name: "Tibo Sottiaux", handle: "@thsottiaux", avatar: "/people/tibo.jpg?v=10", role: { ko: "예수 그 자체", en: "Jesus himself" }, url: "https://x.com/thsottiaux" },
   { name: "OpenAI", handle: "@OpenAI", avatar: "/people/openai.jpg?v=10", role: { ko: "공식 계정", en: "Official account" }, url: "https://x.com/OpenAI" },
   { name: "Romain Huet", handle: "@romainhuet", avatar: "/people/romain.jpg?v=10", role: { ko: "개발자 경험", en: "Developer experience" }, url: "https://x.com/romainhuet" },
   { name: "Greg Brockman", handle: "@gdb", avatar: "/people/greg.jpg?v=10", role: { ko: "OpenAI 공동 창업자", en: "OpenAI co-founder" }, url: "https://x.com/gdb" },
@@ -566,6 +570,7 @@ export function TiboBless() {
               </div>
               <p><b>{copy.scoreWindow}</b> · {copy.scoreWindowBody}</p>
               <code>{copy.scoreFormula}</code>
+              <p className="point-definition">{copy.pointDefinition}</p>
             </section>
           </section>
         </div>
@@ -613,8 +618,10 @@ function SignalTimelineCard({ signal, copy, formatDate }: {
         <span><strong>{signal.author}</strong><small>{signal.handle} · {formatDate(signal.createdAt)}</small></span>
         <b className="signal-badge">{copy.replySignal}</b>
       </div>
-      <div className="parent-post"><span>{copy.parentPost}</span><p>{signal.parentText.en}</p></div>
-      <blockquote>“{signal.text}”</blockquote>
+      <div className="signal-scroll" tabIndex={0} role="region" aria-label={copy.signalDetails}>
+        <div className="parent-post"><span>{copy.parentPost}</span><p>{signal.parentText.en}</p></div>
+        <blockquote>“{signal.text}”</blockquote>
+      </div>
       <div className="signal-impact"><span>{copy.impact}</span><strong>24h {signed(signal.impact24h)}pt</strong><strong>48h {signed(signal.impact48h)}pt</strong></div>
       <a className="timeline-source" href={signal.sourceUrl} target="_blank" rel="noreferrer">{copy.source}<span>↗</span></a>
     </>
