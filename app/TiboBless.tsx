@@ -122,11 +122,11 @@ const howItWorks: { title: Localized; body: Localized }[] = [
 ];
 
 const monitoredSources = [
-  { name: "Tibo Sottiaux", handle: "@thsottiaux", avatar: "/people/tibo.jpg", role: { ko: "최우선 구세주", en: "Priority savior" }, url: "https://x.com/thsottiaux" },
-  { name: "OpenAI", handle: "@OpenAI", avatar: "/people/openai.jpg", role: { ko: "공식 계정", en: "Official account" }, url: "https://x.com/OpenAI" },
-  { name: "Romain Huet", handle: "@romainhuet", avatar: "/people/romain.jpg", role: { ko: "개발자 경험", en: "Developer experience" }, url: "https://x.com/romainhuet" },
-  { name: "Greg Brockman", handle: "@gdb", avatar: "/people/greg.jpg", role: { ko: "OpenAI 공동 창업자", en: "OpenAI co-founder" }, url: "https://x.com/gdb" },
-  { name: "Sam Altman", handle: "@sama", avatar: "/people/sam.jpg", role: { ko: "OpenAI CEO", en: "OpenAI CEO" }, url: "https://x.com/sama" },
+  { name: "Tibo Sottiaux", handle: "@thsottiaux", avatar: "/people/tibo.jpg?v=10", role: { ko: "최우선 구세주", en: "Priority savior" }, url: "https://x.com/thsottiaux" },
+  { name: "OpenAI", handle: "@OpenAI", avatar: "/people/openai.jpg?v=10", role: { ko: "공식 계정", en: "Official account" }, url: "https://x.com/OpenAI" },
+  { name: "Romain Huet", handle: "@romainhuet", avatar: "/people/romain.jpg?v=10", role: { ko: "개발자 경험", en: "Developer experience" }, url: "https://x.com/romainhuet" },
+  { name: "Greg Brockman", handle: "@gdb", avatar: "/people/greg.jpg?v=10", role: { ko: "OpenAI 공동 창업자", en: "OpenAI co-founder" }, url: "https://x.com/gdb" },
+  { name: "Sam Altman", handle: "@sama", avatar: "/people/sam.jpg?v=10", role: { ko: "OpenAI CEO", en: "OpenAI CEO" }, url: "https://x.com/sama" },
 ] as const;
 
 function local(value: Localized, language: Language) {
@@ -138,7 +138,7 @@ function signed(value: number) {
 }
 
 function sourceAvatar(author: string) {
-  return author.toLowerCase().includes("tibo") ? "/people/tibo.jpg" : "/people/openai.jpg";
+  return author.toLowerCase().includes("tibo") ? "/people/tibo.jpg?v=10" : "/people/openai.jpg?v=10";
 }
 
 function formatUtcDate(value: string, language: Language, includeTime = true) {
@@ -479,7 +479,7 @@ function SignalTimelineCard({ signal, language, copy, formatDate }: {
   return (
     <>
       <div className="timeline-card-head">
-        <img className="timeline-avatar" src="/people/tibo.jpg" alt="Tibo Sottiaux" />
+        <img className="timeline-avatar" src="/people/tibo.jpg?v=10" alt="Tibo Sottiaux" />
         <span><strong>{signal.author}</strong><small>{signal.handle} · {formatDate(signal.createdAt)}</small></span>
         <b className="signal-badge">{copy.replySignal}</b>
       </div>
