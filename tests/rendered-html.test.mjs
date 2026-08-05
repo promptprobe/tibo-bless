@@ -112,3 +112,8 @@ test("serves the baseline monitor safely when hosted secrets are unavailable", a
   assert.equal(payload.snapshot.events.length, 12);
   assert.equal(payload.snapshot.signals.length, 2);
 });
+
+test("forces each scheduled four-hour X search slot", async () => {
+  const workerSource = await readFile(new URL("../worker/index.ts", import.meta.url), "utf8");
+  assert.match(workerSource, /scheduled[\s\S]*refreshMonitorSnapshot\(env, \{ force: true \}\)/);
+});
