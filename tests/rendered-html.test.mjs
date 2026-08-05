@@ -21,17 +21,25 @@ test("server-renders Tibo Bless without starter metadata", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>Tibo Bless — Codex Reset Monitor<\/title>/i);
-  assert.match(html, /Tibo Bless/);
-  assert.match(html, /티보의 다음 은총은 언제/);
+  assert.match(html, /<title>티보의 은총 — Tibo Bless<\/title>/i);
+  assert.match(html, /티보의 은총/);
+  assert.match(html, /티보의 다음/);
+  assert.match(html, /은총은 언제\?/);
   assert.match(html, /산출 근거 보기/);
-  assert.match(html, /최근 리셋 타임라인/);
-  assert.match(html, /어떻게 작동하나요/);
+  assert.match(html, /기쁘다 구주 오셨네/);
+  assert.match(html, /좌우로 넘겨 티보의 은총을 확인해 보세요\./);
+  assert.match(html, /은총 받을 확률/);
+  assert.match(html, /은총을 하사하시니/);
+  assert.match(html, /은총 기록/);
+  assert.match(html, /은총 예측 원리/);
+  assert.match(html, /은총 레이더/);
+  assert.match(html, /구세주 목록/);
+  assert.match(html, /마지막 은총 날짜/);
   assert.doesNotMatch(html, /CODEX RESET WATCH/);
   assert.doesNotMatch(html, /공개된 리셋 기록을 바탕으로/);
   assert.doesNotMatch(html, /Juice|Capability|역량/);
   assert.doesNotMatch(html, /\/Users\/|\.vinext\/fonts/);
-  assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
+  assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton|가장 최근에 확인된 리셋|최근 리셋 타임라인|다음 리셋 가능성|어떻게 작동하나요|레퍼런스 분석 성과|실제 리셋을 보장/);
 });
 
 test("ships an installable bilingual PWA shell", async () => {
@@ -40,9 +48,16 @@ test("ships an installable bilingual PWA shell", async () => {
   assert.equal(manifest.short_name, "Tibo Bless");
   assert.equal(manifest.display, "standalone");
   assert.deepEqual(manifest.icons.map((icon) => icon.sizes), ["1254x1254"]);
-  assert.match(serviceWorker, /tibo-bless-v9/);
+  assert.match(serviceWorker, /tibo-bless-v10/);
   assert.match(serviceWorker, /tibo-bless-logo\.png/);
   assert.match(serviceWorker, /manifest\.webmanifest/);
+  assert.match(serviceWorker, /people\/tibo\.jpg/);
+});
+
+test("keeps unrelated reference branding out of repository-facing copy", async () => {
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const app = await readFile(new URL("../app/TiboBless.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(`${readme}\n${app}`, /codexreset\.org/i);
 });
 
 test("serves the baseline monitor safely when hosted secrets are unavailable", async () => {

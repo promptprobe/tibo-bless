@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- profile photos are locally bundled public assets. */
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -16,55 +17,46 @@ type LiveMonitorMeta = {
 
 const labels = {
   ko: {
+    brand: "티보의 은총",
     language: "EN",
     switchLanguage: "영어로 보기",
-    heroTitle: "티보의 다음 은총은 언제?",
+    heroTitle: "티보의 다음\n은총은 언제?",
     lastReset: "마지막 은총 후",
-    lastResetHint: "가장 최근에 확인된 리셋",
-    nextReset: "다음 리셋 가능성",
+    lastResetHint: "마지막 은총 날짜",
+    nextReset: "은총 받을 확률",
     hours24: "24시간 안",
     hours48: "48시간 안",
-    method: "예고 신호가 없을 때의 공개 기록 기준값이에요.",
-    noGuarantee: "과거 기록을 설명하는 참고용 추정치이며, 실제 리셋을 보장하지 않아요.",
-    latestEvidence: "가장 최근에 확인된 리셋",
-    confirmed: "Confirmed Reset",
-    publicData: "공개 기록",
+    latestEvidence: "은총을 하사하시니",
+    confirmed: "은총 기록",
     source: "원문 보기",
     analysis: "산출 근거 보기",
     closeAnalysis: "산출 근거 닫기",
-    analysisTitle: "14%와 26%는 이렇게 계산해요",
-    analysisIntro: "새로운 예고 신호가 없으면 공개 리셋 주기에서 보정한 기준값을 사용하고, 아직 유효한 X 신호의 영향만 더하거나 빼요.",
-    baseline: "신호가 없을 때 기준값",
-    signalAdjustment: "현재 유효한 신호 보정",
-    finalEstimate: "현재 표시값",
-    formula: "산출식",
-    localRecord: "Tibo Bless 기록",
-    localRecordBody: "확인된 리셋 간격은 기준값을 검토하는 보조 자료로 사용해요.",
-    medianGap: "리셋 간격 중앙값",
-    intervals: "확인한 간격",
-    referenceCheck: "레퍼런스 분석 성과",
-    referenceCheckBody: "48시간 예측이 있었던 리셋 6회 중 3회는 직전 예측이 30% 이상이었고, 리셋으로 이어지지 않은 고확률 구간은 1회였어요.",
-    descriptive: "이 수치는 설명용 확률입니다. 미래의 리셋 시각을 약속하거나 보장하지 않습니다.",
-    timeline: "최근 리셋 타임라인",
-    timelineBody: "공개 X 신호와 확인된 리셋을 날짜순으로 모았어요. 좌우로 넘겨 흐름을 확인해보세요.",
+    analysisTitle: "은총 확률은 이렇게 나왔어요",
+    analysisIntro: "확인된 은총의 흐름을 먼저 보고, 마지막 은총 뒤에 나온 새 신호만 반영해요.",
+    baseline: "기본 확률",
+    baselineBody: "새 신호가 없다면 24시간 14%, 48시간 26%에서 시작해요.",
+    signalAdjustment: "새로운 예고",
+    signalBody: "마지막 은총 뒤에 나온 아직 유효한 신호만 더하거나 빼요.",
+    finalEstimate: "최종 확률",
+    finalBody: "기본 확률과 신호 점수를 합쳐 지금의 24·48시간 확률을 보여줘요.",
+    timeline: "기쁘다 구주 오셨네",
+    timelineBody: "좌우로 넘겨 티보의 은총을 확인해 보세요.",
     previous: "이전 기록",
     next: "다음 기록",
     replySignal: "X 예고 신호",
     parentPost: "답글을 단 글",
     impact: "당시 영향",
     scope: "대상",
-    how: "어떻게 작동하나요?",
-    howBody: "공개 근거를 모으고, 의미를 구분한 뒤, 재현 가능한 방식으로 확률에 반영해요.",
-    coverage: "데이터 범위",
-    coverageBody: "SpaceXAI X Search가 주요 계정의 공개 신호를 4시간마다 확인해요.",
+    how: "은총 예측 원리",
+    coverage: "은총 레이더",
     evidence: "검토한 근거",
     resetEvents: "확인된 리셋",
     archive: "기록 범위",
     refresh: "갱신 방식",
     days: "일",
     everyFourHours: "4시간마다",
-    sources: "확인하는 계정",
-    sourcesBody: "레퍼런스와 같은 주요 공개 계정을 우선 확인해요.",
+    sources: "구세주 목록",
+    referenceAccounts: "참고 계정",
     snapshot: "데이터 기준",
     disclaimer: "OpenAI와 관련 없는 독립 프로젝트예요.",
     now: "현재",
@@ -73,37 +65,30 @@ const labels = {
     mobileNav: "빠른 이동",
   },
   en: {
+    brand: "Tibo Bless",
     language: "KO",
     switchLanguage: "한국어로 보기",
     heroTitle: "When is Tibo’s next blessing?",
     lastReset: "Since the last blessing",
-    lastResetHint: "Most recently confirmed reset",
-    nextReset: "Next reset probability",
+    lastResetHint: "Last mercy date",
+    nextReset: "Chance of mercy",
     hours24: "Within 24h",
     hours48: "Within 48h",
-    method: "The public-record baseline when there is no advance signal.",
-    noGuarantee: "A descriptive estimate based on past records, not a promise of a reset.",
-    latestEvidence: "Most recently confirmed reset",
-    confirmed: "Confirmed Reset",
-    publicData: "Public data",
+    latestEvidence: "Mercy was bestowed",
+    confirmed: "Mercy record",
     source: "View source",
     analysis: "View analysis",
     closeAnalysis: "Close analysis",
-    analysisTitle: "How 14% and 26% are calculated",
-    analysisIntro: "With no new advance signal, we use the public reset-cadence baseline, then add or subtract only active X-signal impacts.",
-    baseline: "No-signal baseline",
-    signalAdjustment: "Active signal adjustment",
-    finalEstimate: "Current estimate",
-    formula: "Formula",
-    localRecord: "Tibo Bless records",
-    localRecordBody: "Confirmed reset intervals are supporting context for reviewing the baseline.",
-    medianGap: "Median reset gap",
-    intervals: "Intervals reviewed",
-    referenceCheck: "Reference analysis performance",
-    referenceCheckBody: "Three of six resets with a prior 48h forecast were preceded by a 30%+ estimate; one settled elevated episode was not followed by a reset.",
-    descriptive: "These are descriptive probabilities. They do not promise or guarantee a future reset time.",
-    timeline: "Recent reset timeline",
-    timelineBody: "Public X signals and confirmed resets, ordered by date. Move left or right to follow the sequence.",
+    analysisTitle: "How we got this chance",
+    analysisIntro: "Start with the flow of confirmed mercy, then apply only new hints since the last one.",
+    baseline: "Base chance",
+    baselineBody: "With no new hint, start at 14% for 24 hours and 26% for 48 hours.",
+    signalAdjustment: "New hints",
+    signalBody: "Only active hints posted after the last mercy can move the chance up or down.",
+    finalEstimate: "Final chance",
+    finalBody: "Combine the base chance and hint points into the current 24h and 48h chance.",
+    timeline: "Joy to the world, mercy has come",
+    timelineBody: "Swipe sideways to follow Tibo’s moments of mercy.",
     previous: "Previous entry",
     next: "Next entry",
     replySignal: "X forecast signal",
@@ -111,17 +96,15 @@ const labels = {
     impact: "Impact at the time",
     scope: "Scope",
     how: "How it works",
-    howBody: "We collect public evidence, classify its meaning, and apply it with a reproducible formula.",
-    coverage: "Reset data coverage",
-    coverageBody: "SpaceXAI X Search checks public signals from key accounts every four hours.",
+    coverage: "Mercy radar",
     evidence: "Evidence assessed",
     resetEvents: "Reset events",
     archive: "Archive window",
     refresh: "Refresh",
     days: "days",
     everyFourHours: "Every 4h",
-    sources: "Sources we monitor",
-    sourcesBody: "We prioritize the same key public accounts as the reference monitor.",
+    sources: "Savior list",
+    referenceAccounts: "Reference accounts",
     snapshot: "Data as of",
     disclaimer: "An independent project not affiliated with OpenAI.",
     now: "Now",
@@ -131,19 +114,19 @@ const labels = {
   },
 } as const;
 
-const howItWorks: Localized[] = [
-  { ko: "주요 계정의 공개 글과 확인된 리셋 기록을 모아요.", en: "Collect public posts and confirmed resets from key accounts." },
-  { ko: "완료 여부, 적용 범위, 시점의 확실성을 나눠 판단해요.", en: "Classify completion, scope, timing, and confidence." },
-  { ko: "유효한 신호의 가감점만 14%·26% 기준값에 반영해요.", en: "Apply only active signal points to the 14% / 26% baseline." },
-  { ko: "누구나 다시 확인할 수 있도록 원문 링크를 남겨요.", en: "Preserve the original source so anyone can verify it." },
+const howItWorks: { title: Localized; body: Localized }[] = [
+  { title: { ko: "공개 신호 수집", en: "Collect public signals" }, body: { ko: "주요 계정의 게시물과 답글을 모아요.", en: "Gather posts and replies from key accounts." } },
+  { title: { ko: "뜻을 구분", en: "Separate the meaning" }, body: { ko: "실제 은총, 예고, 농담과 요청을 나눠요.", en: "Distinguish mercy, hints, jokes, and requests." } },
+  { title: { ko: "확률 업데이트", en: "Update the chance" }, body: { ko: "기본 확률에 아직 유효한 새 신호만 더하거나 빼요.", en: "Add or subtract only active new hints from the base chance." } },
+  { title: { ko: "원문 보존", en: "Preserve the source" }, body: { ko: "모든 판단에서 원문을 바로 확인할 수 있어요.", en: "Keep every original source one tap away." } },
 ];
 
 const monitoredSources = [
-  { name: "Tibo Sottiaux", handle: "@thsottiaux", role: { ko: "최우선 소스", en: "Priority source" }, url: "https://x.com/thsottiaux" },
-  { name: "OpenAI", handle: "@OpenAI", role: { ko: "공식 계정", en: "Official account" }, url: "https://x.com/OpenAI" },
-  { name: "Romain Huet", handle: "@romainhuet", role: { ko: "개발자 경험", en: "Developer experience" }, url: "https://x.com/romainhuet" },
-  { name: "Greg Brockman", handle: "@gdb", role: { ko: "OpenAI 공동 창업자", en: "OpenAI co-founder" }, url: "https://x.com/gdb" },
-  { name: "Sam Altman", handle: "@sama", role: { ko: "OpenAI CEO", en: "OpenAI CEO" }, url: "https://x.com/sama" },
+  { name: "Tibo Sottiaux", handle: "@thsottiaux", avatar: "/people/tibo.jpg", role: { ko: "최우선 구세주", en: "Priority savior" }, url: "https://x.com/thsottiaux" },
+  { name: "OpenAI", handle: "@OpenAI", avatar: "/people/openai.jpg", role: { ko: "공식 계정", en: "Official account" }, url: "https://x.com/OpenAI" },
+  { name: "Romain Huet", handle: "@romainhuet", avatar: "/people/romain.jpg", role: { ko: "개발자 경험", en: "Developer experience" }, url: "https://x.com/romainhuet" },
+  { name: "Greg Brockman", handle: "@gdb", avatar: "/people/greg.jpg", role: { ko: "OpenAI 공동 창업자", en: "OpenAI co-founder" }, url: "https://x.com/gdb" },
+  { name: "Sam Altman", handle: "@sama", avatar: "/people/sam.jpg", role: { ko: "OpenAI CEO", en: "OpenAI CEO" }, url: "https://x.com/sama" },
 ] as const;
 
 function local(value: Localized, language: Language) {
@@ -154,13 +137,30 @@ function signed(value: number) {
   return value > 0 ? `+${value}` : `${value}`;
 }
 
+function sourceAvatar(author: string) {
+  return author.toLowerCase().includes("tibo") ? "/people/tibo.jpg" : "/people/openai.jpg";
+}
+
+function formatUtcDate(value: string, language: Language, includeTime = true) {
+  const date = new Date(value);
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const day = date.getUTCDate();
+  const dateLabel = language === "ko"
+    ? `${year}년 ${month + 1}월 ${day}일`
+    : `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][month]} ${String(day).padStart(2, "0")}, ${year}`;
+  return includeTime
+    ? `${dateLabel} ${String(date.getUTCHours()).padStart(2, "0")}:${String(date.getUTCMinutes()).padStart(2, "0")} UTC`
+    : dateLabel;
+}
+
 export function TiboBless() {
   const [language, setLanguage] = useState<Language>("ko");
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [liveData, setLiveData] = useState<MonitorSnapshot>(monitorData);
   const [liveMeta, setLiveMeta] = useState<LiveMonitorMeta | null>(null);
   const copy = labels[language];
-  const now = useMemo(() => new Date(), []);
+  const [now, setNow] = useState(() => new Date(monitorData.generatedAt));
   const forecast = useMemo(() => buildForecast(liveData, now), [liveData, now]);
   const resets = useMemo(
     () => [...liveData.events].sort((a, b) => b.dateTime.localeCompare(a.dateTime)),
@@ -185,6 +185,7 @@ export function TiboBless() {
     const saved = window.localStorage.getItem("tibo-bless-language");
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate the saved language after SSR
     if (saved === "ko" || saved === "en") setLanguage(saved);
+    setNow(new Date());
   }, []);
 
   useEffect(() => {
@@ -250,16 +251,7 @@ export function TiboBless() {
     : `${elapsedAmount} ${elapsedHours >= 48 ? `day${elapsedAmount === 1 ? "" : "s"}` : `hour${elapsedAmount === 1 ? "" : "s"}`}`;
   const archiveDays = Math.ceil((new Date(latest.dateTime).getTime() - new Date(resets.at(-1)!.dateTime).getTime()) / 86_400_000);
 
-  const formatDate = (date: string, includeTime = true) => new Intl.DateTimeFormat(
-    language === "ko" ? "ko-KR" : "en-US",
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      ...(includeTime ? { hour: "2-digit", minute: "2-digit" } : {}),
-      timeZone: "UTC",
-    },
-  ).format(new Date(date)) + (includeTime ? " UTC" : "");
+  const formatDate = (date: string, includeTime = true) => formatUtcDate(date, language, includeTime);
 
   const moveTimeline = (direction: -1 | 1) => {
     setSelectedTimeline((current) => Math.min(timeline.length - 1, Math.max(0, current + direction)));
@@ -287,10 +279,9 @@ export function TiboBless() {
   return (
     <div className="site-shell">
       <header className="top-nav container">
-        <Link className="wordmark" href="/" aria-label="Tibo Bless home">
-          {/* eslint-disable-next-line @next/next/no-img-element -- Cloudflare vinext does not provide Next's image optimizer in dev. */}
+        <Link className="wordmark" href="/" aria-label={`${copy.brand} home`}>
           <img className="brand-logo" src="/tibo-bless-logo.png" alt="" width="52" height="52" />
-          <strong>Tibo Bless</strong>
+          <strong>{copy.brand}</strong>
         </Link>
         <button
           className="language-button"
@@ -305,7 +296,7 @@ export function TiboBless() {
       <main>
         <section className="hero container" id="status">
           <div className="hero-copy">
-            <h1>{copy.heroTitle}</h1>
+            <h1>{copy.heroTitle.split("\n").map((line) => <span key={line}>{line}</span>)}</h1>
             <div className="reset-clock">
               <div>
                 <span>{copy.lastReset}</span>
@@ -313,15 +304,16 @@ export function TiboBless() {
               </div>
               <strong>{elapsed}</strong>
             </div>
+            <div className="reference-strip" aria-label={copy.referenceAccounts}>
+              <span>{copy.referenceAccounts}</span>
+              <div>{monitoredSources.slice(0, 3).map((source) => <img key={source.handle} src={source.avatar} alt={source.name} />)}</div>
+              <small>Tibo · OpenAI · Romain</small>
+            </div>
           </div>
 
           <aside className="forecast-card" aria-label={copy.nextReset}>
             <div className="forecast-heading">
-              <div>
-                <span>{copy.nextReset}</span>
-                <small>{copy.method}</small>
-              </div>
-              <b>{copy.publicData}</b>
+              <div><span>{copy.nextReset}</span></div>
             </div>
             <div className="probability-grid">
               <Probability value={forecast.score24h} label={copy.hours24} />
@@ -337,7 +329,6 @@ export function TiboBless() {
               </div>
               <b>{copy.confirmed} ↗</b>
             </a>
-            <p className="forecast-note">{copy.noGuarantee}</p>
           </aside>
         </section>
 
@@ -380,18 +371,18 @@ export function TiboBless() {
           <div className="container info-stack">
             <div className="info-block">
               <div className="section-heading compact">
-                <div><p>{copy.how}</p><h2>{copy.howBody}</h2></div>
+                <div><p>{copy.how}</p></div>
               </div>
               <ol className="how-grid">
                 {howItWorks.map((step, index) => (
-                  <li key={step.en}><span>{String(index + 1).padStart(2, "0")}</span><p>{local(step, language)}</p></li>
+                  <li key={step.title.en}><span>{index + 1}</span><div><h3>{local(step.title, language)}</h3><p>{local(step.body, language)}</p></div></li>
                 ))}
               </ol>
             </div>
 
             <div className="info-block">
               <div className="section-heading compact">
-                <div><p>{copy.coverage}</p><h2>{copy.coverageBody}</h2></div>
+                <div><p>{copy.coverage}</p></div>
               </div>
               <dl className="coverage-grid">
                 <div><dt>{copy.evidence}</dt><dd>{liveData.events.length + liveData.signals.length}</dd></div>
@@ -403,12 +394,12 @@ export function TiboBless() {
 
             <div className="info-block sources-block">
               <div className="section-heading compact">
-                <div><p>{copy.sources}</p><h2>{copy.sourcesBody}</h2></div>
+                <div><p>{copy.sources}</p></div>
               </div>
               <div className="sources-grid">
                 {monitoredSources.map((source) => (
                   <a key={source.handle} href={source.url} target="_blank" rel="noreferrer" className="source-card">
-                    <span className="source-avatar">{source.name.slice(0, 1)}</span>
+                    <img className="source-avatar" src={source.avatar} alt={source.name} />
                     <span><strong>{source.name}</strong><small>{source.handle} · {local(source.role, language)}</small></span>
                     <b>↗</b>
                   </a>
@@ -420,7 +411,7 @@ export function TiboBless() {
       </main>
 
       <footer className="container">
-        <span>© 2026 Tibo Bless</span>
+        <span>© 2026 {copy.brand}</span>
         <span>{copy.snapshot} · {formatDate(liveMeta?.lastSuccessAt ?? liveData.generatedAt, false)}</span>
         <span>{copy.disclaimer}</span>
       </footer>
@@ -437,32 +428,14 @@ export function TiboBless() {
         }}>
           <section className="analysis-modal" role="dialog" aria-modal="true" aria-labelledby="analysis-title">
             <button className="modal-close" type="button" aria-label={copy.closeAnalysis} onClick={() => setAnalysisOpen(false)}>×</button>
-            <p className="modal-kicker">Tibo Bless Analysis</p>
+            <p className="modal-kicker">MERCY ANALYSIS</p>
             <h2 id="analysis-title">{copy.analysisTitle}</h2>
             <p className="modal-intro">{copy.analysisIntro}</p>
-            <div className="formula-card">
-              <span>{copy.formula}</span>
-              <code>P24 = clamp(14 + Σ signal24, 1, 95)</code>
-              <code>P48 = clamp(max(P24, 26 + Σ signal48), 1, 98)</code>
+            <div className="analysis-easy-steps">
+              <article><span>1</span><div><b>{copy.baseline}</b><p>{copy.baselineBody}</p><strong>24h 14% · 48h 26%</strong></div></article>
+              <article><span>2</span><div><b>{copy.signalAdjustment}</b><p>{copy.signalBody}</p><strong>24h {signed(forecast.adjustment24h)}pt · 48h {signed(forecast.adjustment48h)}pt</strong></div></article>
+              <article><span>3</span><div><b>{copy.finalEstimate}</b><p>{copy.finalBody}</p><strong>24h {forecast.score24h}% · 48h {forecast.score48h}%</strong></div></article>
             </div>
-            <div className="analysis-math">
-              <div><span>{copy.baseline}</span><strong>14% / 26%</strong></div>
-              <div><span>{copy.signalAdjustment}</span><strong>{signed(forecast.adjustment24h)} / {signed(forecast.adjustment48h)}</strong></div>
-              <div><span>{copy.finalEstimate}</span><strong>{forecast.score24h}% / {forecast.score48h}%</strong></div>
-            </div>
-            <div className="analysis-detail-grid">
-              <div>
-                <span>{copy.localRecord}</span>
-                <p>{copy.localRecordBody}</p>
-                <dl><div><dt>{copy.intervals}</dt><dd>{forecast.sampleSize}</dd></div><div><dt>{copy.medianGap}</dt><dd>{forecast.medianIntervalDays ?? "—"} {copy.days}</dd></div></dl>
-              </div>
-              <div>
-                <span>{copy.referenceCheck}</span>
-                <p>{copy.referenceCheckBody}</p>
-                <a href="https://codexreset.org/#timeline" target="_blank" rel="noreferrer">codexreset.org ↗</a>
-              </div>
-            </div>
-            <p className="analysis-disclaimer">{copy.descriptive}</p>
           </section>
         </div>
       )}
@@ -483,7 +456,7 @@ function ResetTimelineCard({ event, language, copy, formatDate }: {
   return (
     <>
       <div className="timeline-card-head">
-        <span className="timeline-avatar">{event.author.slice(0, 1)}</span>
+        <img className="timeline-avatar" src={sourceAvatar(event.author)} alt={event.author} />
         <span><strong>{event.author}</strong><small>{formatDate(event.dateTime)}</small></span>
         <b className="event-badge">{copy.confirmed}</b>
       </div>
@@ -506,7 +479,7 @@ function SignalTimelineCard({ signal, language, copy, formatDate }: {
   return (
     <>
       <div className="timeline-card-head">
-        <span className="timeline-avatar">T</span>
+        <img className="timeline-avatar" src="/people/tibo.jpg" alt="Tibo Sottiaux" />
         <span><strong>{signal.author}</strong><small>{signal.handle} · {formatDate(signal.createdAt)}</small></span>
         <b className="signal-badge">{copy.replySignal}</b>
       </div>

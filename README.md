@@ -1,10 +1,10 @@
-# Tibo Bless
+# Tibo Bless · 티보의 은총
 
 [![Open Tibo Bless PWA](https://img.shields.io/badge/Open_PWA-Tibo_Bless-111111?style=for-the-badge)](https://tibos-mercy.cloudy-gull-7634.chatgpt.site)
 
 **[PWA 실행·설치 / Open & install the PWA](https://tibos-mercy.cloudy-gull-7634.chatgpt.site)**
 
-Tibo Bless는 공개 근거를 바탕으로 Codex의 글로벌 사용량 리셋과 다음 24·48시간 가능성을 보여주는 간단한 한국어·영어 모니터입니다.
+Tibo Bless(티보의 은총)는 공개 근거를 바탕으로 Codex의 글로벌 사용량 리셋과 다음 24·48시간 은총 확률을 보여주는 한국어·영어 모니터입니다.
 
 Tibo Bless is a simple bilingual monitor for verified global Codex resets and the next 24/48-hour probability.
 
@@ -14,6 +14,8 @@ Tibo Bless is a simple bilingual monitor for verified global Codex resets and th
 - 공개 레퍼런스의 무신호 기준값 14%·26%에 아직 유효한 신호 보정만 반영합니다. / The 14% / 26% evidence-free baseline is adjusted only by active signals.
 - 최신 확정 리셋 이후 생성되고 아직 유효한 공개 신호만 확률에 반영합니다. / Only unexpired public signals created after the latest reset affect the forecast.
 - 모든 확정 기록은 공개 원문으로 연결됩니다. / Every confirmed record links to its public source.
+- `기쁘다 구주 오셨네` 타임라인은 인물 사진과 함께 은총 기록·예고 신호를 좌우 스와이프로 보여줍니다. / The `Joy to the world` rail shows mercy records and hint signals with profile photos.
+- `은총 레이더`, `구세주 목록`, 쉬운 3단계 산출 근거를 한국어와 영어로 제공합니다. / Includes a bilingual Mercy Radar, Savior List, and plain-language three-step calculation view.
 
 ## 실행 / Run locally
 
@@ -46,6 +48,7 @@ lib/monitor-logic.js   classification and forecast logic
 lib/xai-monitor.ts     four-hour SpaceXAI refresh and D1 persistence
 lib/xai-normalize.js   citation and evidence validation
 public/                PWA metadata, icons, and social preview
+public/people/         locally bundled public profile images
 tests/                 logic and rendered-output tests
 .openai/hosting.json   Sites deployment binding
 ```

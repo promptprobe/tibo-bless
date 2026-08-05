@@ -3,9 +3,9 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tibos-mercy.cloudy-gull-7634.chatgpt.site"),
-  title: "Tibo Bless — Codex Reset Monitor",
+  title: "티보의 은총 — Tibo Bless",
   description:
-    "A simple bilingual monitor for verified Codex resets and next-reset probabilities.",
+    "티보의 은총 기록과 공개 신호로 24·48시간 확률을 보여주는 한국어·영어 PWA.",
   applicationName: "Tibo Bless",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -14,18 +14,18 @@ export const metadata: Metadata = {
   },
   appleWebApp: { capable: true, statusBarStyle: "default", title: "Tibo Bless" },
   openGraph: {
-    title: "Tibo Bless",
+    title: "티보의 은총 | Tibo Bless",
     description:
-      "Verified Codex reset evidence and next-reset probabilities — in Korean and English.",
+      "은총 기록과 공개 신호를 한국어와 영어로 확인하세요.",
     type: "website",
     locale: "ko_KR",
     alternateLocale: "en_US",
-    images: [{ url: "/og.png", width: 1731, height: 909, alt: "Tibo Bless — Codex Reset Monitor" }],
+    images: [{ url: "/og.png", width: 1731, height: 909, alt: "티보의 은총 — Tibo Bless" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tibo Bless",
-    description: "Simple bilingual Codex reset monitor.",
+    title: "티보의 은총 | Tibo Bless",
+    description: "Bilingual mercy timeline and Codex signal monitor.",
     images: ["/og.png"],
   },
 };
