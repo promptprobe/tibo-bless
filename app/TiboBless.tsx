@@ -8,6 +8,10 @@ import { monitorData, type Localized, type MonitorSnapshot, type ResetEvent, typ
 
 type Language = "ko" | "en";
 type TimelineItem = { kind: "reset"; item: ResetEvent } | { kind: "signal"; item: Signal };
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
 type LiveMonitorMeta = {
   lastSuccessAt: string | null;
   lastAttemptAt: string | null;
@@ -85,6 +89,11 @@ const labels = {
     alertSuccess: "신청했어요. 다음 은총부터 알려드릴게요.",
     alertPendingSetup: "주소를 저장했어요. 발송 연결이 완료되면 다음 은총부터 알려드려요.",
     alertError: "신청하지 못했어요. 잠시 뒤 다시 시도해 주세요.",
+    installTitle: "홈 화면에 Tibo Bless 추가",
+    installBody: "GPT 로그인 없이 누구나 홈 화면에서 앱처럼 열 수 있어요.",
+    installAction: "홈 화면에 추가",
+    installIos: "Safari에서 공유 버튼을 누른 뒤 ‘홈 화면에 추가’를 선택하세요.",
+    installAndroid: "Chrome 메뉴(⋮)에서 ‘홈 화면에 추가’ 또는 ‘앱 설치’를 선택하세요.",
     snapshot: "데이터 기준",
     disclaimer: "OpenAI와 관련 없는 독립 프로젝트예요.",
     now: "현재",
@@ -161,6 +170,11 @@ const labels = {
     alertSuccess: "Subscribed. We’ll email you after the next mercy.",
     alertPendingSetup: "Saved. Alerts will begin when mail delivery is connected.",
     alertError: "Could not subscribe. Please try again shortly.",
+    installTitle: "Add Tibo Bless to your Home Screen",
+    installBody: "Anyone can open it like an app—no GPT login required.",
+    installAction: "Add to Home Screen",
+    installIos: "In Safari, tap Share, then choose ‘Add to Home Screen.’",
+    installAndroid: "In Chrome, open the ⋮ menu and choose ‘Add to Home screen’ or ‘Install app.’",
     snapshot: "Data as of",
     disclaimer: "An independent project not affiliated with OpenAI.",
     now: "Now",
@@ -226,6 +240,8 @@ export function TiboBless() {
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [alertEmail, setAlertEmail] = useState("");
   const [alertStatus, setAlertStatus] = useState<"idle" | "submitting" | "success" | "pending" | "error">("idle");
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installHelpOpen, setInstallHelpOpen] = useState(false);
   const [liveData, setLiveData] = useState<MonitorSnapshot>(monitorData);
   const [liveMeta, setLiveMeta] = useState<LiveMonitorMeta | null>(null);
   const copy = labels[language];
@@ -264,6 +280,23 @@ export function TiboBless() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    const onBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    const onAppInstalled = () => {
+      setInstallPrompt(null);
+      setInstallHelpOpen(false);
+    };
+    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    window.addEventListener("appinstalled", onAppInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", onAppInstalled);
+    };
   }, []);
 
   useEffect(() => {
@@ -340,6 +373,25 @@ export function TiboBless() {
       setAlertStatus(result.mailReady ? "success" : "pending");
     } catch {
       setAlertStatus("error");
+    }
+  };
+
+  const requestInstall = async () => {
+    if (!installPrompt) {
+      setInstallHelpOpen((current) => !current);
+      return;
+    }
+    try {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice.outcome === "accepted") {
+        setInstallPrompt(null);
+        setInstallHelpOpen(false);
+      } else {
+        setInstallHelpOpen(true);
+      }
+    } catch {
+      setInstallHelpOpen(true);
     }
   };
 
@@ -444,6 +496,26 @@ export function TiboBless() {
               {alertStatus === "success" ? copy.alertSuccess : alertStatus === "pending" ? copy.alertPendingSetup : copy.alertError}
             </small>
           )}
+        </section>
+
+        <section className="install-panel container" aria-labelledby="install-title">
+          <img src="/tibo-bless-icon-192.png" alt="" width="54" height="54" />
+          <div className="install-copy">
+            <p id="install-title">{copy.installTitle}</p>
+            <span>{copy.installBody}</span>
+          </div>
+          <button
+            type="button"
+            aria-expanded={installHelpOpen}
+            aria-controls="install-help"
+            onClick={requestInstall}
+          >
+            {copy.installAction}
+          </button>
+          <div className="install-help" id="install-help" hidden={!installHelpOpen}>
+            <p><b>iPhone</b><span>{copy.installIos}</span></p>
+            <p><b>Android</b><span>{copy.installAndroid}</span></p>
+          </div>
         </section>
 
         <section className="timeline-section" id="timeline">
