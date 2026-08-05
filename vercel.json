@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "npx next build",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://tibos-mercy.cloudy-gull-7634.chatgpt.site/api/:path*"
+    }
+  ]
+}
