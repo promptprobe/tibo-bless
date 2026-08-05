@@ -89,6 +89,21 @@ test("ships an installable bilingual PWA shell", async () => {
   assert.match(serviceWorker, /people\/tibo\.jpg/);
 });
 
+test("deploys the PWA on Vercel while preserving the Sites API backend", async () => {
+  const vercel = JSON.parse(await readFile(new URL("../vercel.json", import.meta.url), "utf8"));
+  const layout = await readFile(new URL("../app/layout.tsx", import.meta.url), "utf8");
+
+  assert.equal(vercel.framework, "nextjs");
+  assert.match(vercel.buildCommand, /next build/);
+  assert.deepEqual(vercel.rewrites, [
+    {
+      source: "/api/:path*",
+      destination: "https://tibos-mercy.cloudy-gull-7634.chatgpt.site/api/:path*",
+    },
+  ]);
+  assert.match(layout, /https:\/\/tibobless\.vercel\.app/);
+});
+
 test("documents the exact mercy email copy and provider boundary", async () => {
   const emailAlerts = await readFile(new URL("../lib/email-alerts.ts", import.meta.url), "utf8");
   const envExample = await readFile(new URL("../.env.example", import.meta.url), "utf8");

@@ -11,7 +11,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tibos-mercy.cloudy-gull-7634.chatgpt.site"),
+  metadataBase: new URL("https://tibobless.vercel.app"),
   title: "티보의 은총 — Tibo Bless",
   description:
     "티보의 은총 기록과 공개 신호로 24·48시간 확률을 보여주는 한국어·영어 PWA.",
