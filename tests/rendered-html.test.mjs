@@ -34,6 +34,8 @@ test("server-renders Tibo Bless without starter metadata", async () => {
   assert.match(html, /기쁘다 구주 오셨네/);
   assert.match(html, /좌우로 넘겨 티보의 은총을 확인해 보세요\./);
   assert.match(html, /은총 받을 확률/);
+  assert.match(html, /24시간 이내/);
+  assert.match(html, /48시간 이내/);
   assert.match(html, /은총을 하사하시니/);
   assert.match(html, /은총 기록/);
   assert.match(html, /은총 예측 원리/);
@@ -43,12 +45,17 @@ test("server-renders Tibo Bless without starter metadata", async () => {
   assert.match(html, /마지막 은총으로부터/);
   assert.match(html, /구세주 시그널 수집/);
   assert.match(html, /구세주의 계시를 모아요/);
+  assert.match(html, /티보의 은총을 이메일로 전달받기/);
   assert.match(html, /이메일 알림 신청/);
+  assert.match(html, /예수 그 자체/);
+  assert.match(app, /pt는 퍼센트포인트예요/);
+  assert.match(app, /시간이 흐른다고 자동으로 오르지는 않아요/);
+  assert.match(app, /className="signal-scroll"/);
   assert.match(html, /I have reset usage limits for Codex and ChatGPT Work\. Enjoy\./);
   assert.doesNotMatch(html, /class="mobile-dock"/);
   assert.doesNotMatch(html, /CODEX RESET WATCH/);
   assert.doesNotMatch(html, /공개된 리셋 기록을 바탕으로/);
-  assert.doesNotMatch(html, /Juice|Capability|역량/);
+  assert.doesNotMatch(html, /24시간 안|48시간 안|최우선 구세주|다음 은총이 확인되면 이메일로 한 번 알려드려요|Juice|Capability|역량/);
   assert.doesNotMatch(html, /\/Users\/|\.vinext\/fonts/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton|가장 최근에 확인된 리셋|최근 리셋 타임라인|다음 리셋 가능성|어떻게 작동하나요|레퍼런스 분석 성과|실제 리셋을 보장/);
 });
@@ -59,7 +66,7 @@ test("ships an installable bilingual PWA shell", async () => {
   assert.equal(manifest.short_name, "Tibo Bless");
   assert.equal(manifest.display, "standalone");
   assert.deepEqual(manifest.icons.map((icon) => icon.sizes), ["1254x1254"]);
-  assert.match(serviceWorker, /tibo-bless-v11/);
+  assert.match(serviceWorker, /tibo-bless-v12/);
   assert.match(serviceWorker, /tibo-bless-logo\.png/);
   assert.match(serviceWorker, /manifest\.webmanifest/);
   assert.match(serviceWorker, /people\/tibo\.jpg/);
