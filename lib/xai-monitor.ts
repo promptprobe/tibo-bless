@@ -1,32 +1,18 @@
-import { ALLOWED_HANDLES, extractVerifiedDiscoveries, getStatusId } from "./xai-normalize.js";
-import { classifyPost } from "./monitor-logic.js";
-import {
-  monitorData,
-  type MonitorSnapshot,
-  type ResetEvent,
-  type Signal,
-} from "@/app/monitor-data";
-
-export const REFRESH_INTERVAL_HOURS = 4;
-export const REFRESH_INTERVAL_MS = REFRESH_INTERVAL_HOURS * 60 * 60 * 1000;
+import { monitorData, type MonitorSnapshot } from "@/app/monitor-data";
 
 const SYNC_ID = "latest";
-const LOCK_TIMEOUT_MS = 60 * 1000;
-const SEARCH_WINDOW_DAYS = 8;
-const RETAIN_LIVE_DAYS = 30;
 
 export type MonitorEnv = {
   DB: D1Database;
-  XAI_API_KEY?: string;
 };
 
 export type MonitorSyncMeta = {
-  source: "spacexai-x-search";
-  intervalHours: 4;
-  status: "fresh" | "updated" | "refreshing" | "missing-key" | "error";
+  source: "stored-snapshot";
+  intervalHours: null;
+  status: "disabled";
   lastSuccessAt: string | null;
   lastAttemptAt: string | null;
-  error: string | null;
+  error: null;
 };
 
 export type MonitorSyncResult = {
@@ -38,98 +24,31 @@ type StoredState = {
   snapshotJson: string;
   lastAttemptAt: string | null;
   lastSuccessAt: string | null;
-  lastError: string | null;
-  keyFingerprint: string | null;
 };
 
-type Discovery = {
-  source_url: string;
-  author: string;
-  handle: string;
-  created_at: string;
-  text: string;
-  parent_text_en: string;
-  parent_text_ko: string;
-  kind: "confirmed_reset" | "upward_signal" | "negative_signal" | "archived_signal";
-  title_en: string;
-  title_ko: string;
-  scope_en: string;
-  scope_ko: string;
-  reason_en: string;
-  reason_ko: string;
-};
-
-export async function refreshMonitorSnapshot(
-  env: MonitorEnv,
-  options: { force?: boolean; now?: Date } = {},
-): Promise<MonitorSyncResult> {
-  const now = options.now ?? new Date();
+/**
+ * Return the bundled and previously persisted evidence without contacting X or
+ * any other discovery API. Automated X crawling was retired on 2026-08-11.
+ */
+export async function readMonitorSnapshot(env: MonitorEnv): Promise<MonitorSyncResult> {
   await ensureMonitorSchema(env.DB);
-
   const stored = await readStoredState(env.DB);
-  const snapshot = mergeSnapshots(monitorData, parseSnapshot(stored?.snapshotJson), [], now);
-  const lastSuccessAt = stored?.lastSuccessAt ?? null;
-  const lastSuccessMs = lastSuccessAt ? new Date(lastSuccessAt).getTime() : Number.NaN;
-  const lastAttemptAt = stored?.lastAttemptAt ?? null;
-  const lastAttemptMs = lastAttemptAt ? new Date(lastAttemptAt).getTime() : Number.NaN;
+  const snapshot = mergeSnapshots(monitorData, parseSnapshot(stored?.snapshotJson));
 
-  if (!options.force && Number.isFinite(lastSuccessMs) && now.getTime() - lastSuccessMs < REFRESH_INTERVAL_MS) {
-    return result(snapshot, "fresh", lastSuccessAt, lastAttemptAt);
-  }
-
-  if (!env.XAI_API_KEY) {
-    return result(snapshot, "missing-key", lastSuccessAt, lastAttemptAt);
-  }
-
-  const keyFingerprint = await fingerprintApiKey(env.XAI_API_KEY);
-
-  if (
-    !options.force
-    && stored?.lastError
-    && stored.keyFingerprint === keyFingerprint
-    && Number.isFinite(lastAttemptMs)
-    && now.getTime() - lastAttemptMs < REFRESH_INTERVAL_MS
-  ) {
-    return result(snapshot, "error", lastSuccessAt, lastAttemptAt, stored.lastError);
-  }
-
-  const acquired = await acquireRefreshLock(env.DB, snapshot, now, keyFingerprint);
-  if (!acquired) {
-    const current = await readStoredState(env.DB);
-    return result(
-      snapshot,
-      current?.lastError ? "error" : "refreshing",
-      current?.lastSuccessAt ?? lastSuccessAt,
-      current?.lastAttemptAt ?? lastAttemptAt,
-      current?.lastError ?? null,
-    );
-  }
-
-  try {
-    const discoveries = await fetchDiscoveries(env.XAI_API_KEY, now);
-    const nextSnapshot = mergeSnapshots(monitorData, snapshot, discoveries, now);
-    const refreshedAt = now.toISOString();
-
-    await env.DB.prepare(`
-      UPDATE monitor_sync_state
-      SET snapshot_json = ?, last_success_at = ?, last_error = NULL
-      WHERE id = ?
-    `).bind(JSON.stringify(nextSnapshot), refreshedAt, SYNC_ID).run();
-
-    return result(nextSnapshot, "updated", refreshedAt, refreshedAt);
-  } catch (error) {
-    const message = safeErrorMessage(error);
-    await env.DB.prepare(`
-      UPDATE monitor_sync_state
-      SET last_error = ?
-      WHERE id = ?
-    `).bind(message, SYNC_ID).run();
-    console.error("SpaceXAI monitor refresh failed", message);
-    return result(snapshot, "error", lastSuccessAt, now.toISOString(), message);
-  }
+  return {
+    snapshot,
+    meta: {
+      source: "stored-snapshot",
+      intervalHours: null,
+      status: "disabled",
+      lastSuccessAt: stored?.lastSuccessAt ?? null,
+      lastAttemptAt: stored?.lastAttemptAt ?? null,
+      error: null,
+    },
+  };
 }
 
-export async function ensureMonitorSchema(db: D1Database) {
+async function ensureMonitorSchema(db: D1Database) {
   await db.prepare(`
     CREATE TABLE IF NOT EXISTS monitor_sync_state (
       id TEXT PRIMARY KEY NOT NULL,
@@ -147,260 +66,39 @@ async function readStoredState(db: D1Database): Promise<StoredState | null> {
     SELECT
       snapshot_json AS snapshotJson,
       last_attempt_at AS lastAttemptAt,
-      last_success_at AS lastSuccessAt,
-      last_error AS lastError,
-      key_fingerprint AS keyFingerprint
+      last_success_at AS lastSuccessAt
     FROM monitor_sync_state
     WHERE id = ?
   `).bind(SYNC_ID).first<StoredState>();
   return row ?? null;
 }
 
-async function acquireRefreshLock(
-  db: D1Database,
-  snapshot: MonitorSnapshot,
-  now: Date,
-  keyFingerprint: string,
-) {
-  const lockCutoff = new Date(now.getTime() - LOCK_TIMEOUT_MS).toISOString();
-  const lock = await db.prepare(`
-    INSERT INTO monitor_sync_state (id, snapshot_json, last_attempt_at, key_fingerprint)
-    VALUES (?, ?, ?, ?)
-    ON CONFLICT(id) DO UPDATE SET
-      last_attempt_at = excluded.last_attempt_at,
-      last_error = NULL,
-      key_fingerprint = excluded.key_fingerprint
-    WHERE monitor_sync_state.key_fingerprint IS NULL
-       OR monitor_sync_state.key_fingerprint != excluded.key_fingerprint
-       OR monitor_sync_state.last_attempt_at IS NULL
-       OR monitor_sync_state.last_attempt_at < ?
-  `).bind(SYNC_ID, JSON.stringify(snapshot), now.toISOString(), keyFingerprint, lockCutoff).run();
-  return Number(lock.meta?.changes ?? 0) > 0;
-}
-
-async function fingerprintApiKey(apiKey: string) {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(apiKey));
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-async function fetchDiscoveries(apiKey: string, now: Date): Promise<Discovery[]> {
-  const fromDate = formatIsoDate(new Date(now.getTime() - SEARCH_WINDOW_DAYS * 86_400_000));
-  const toDate = formatIsoDate(now);
-  const response = await fetch("https://api.x.ai/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "grok-4.5",
-      store: false,
-      include: ["no_inline_citations"],
-      input: [
-        {
-          role: "system",
-          content: "You are a strict evidence collector. Never invent a post, URL, timestamp, quote, author, context, or scope. Exclude anything that cannot be tied to an X status URL returned by X Search. Preserve post text verbatim. A confirmed reset requires completed-action wording and broad Codex or ChatGPT Work scope; requests and jokes are signals, not confirmed resets.",
-        },
-        {
-          role: "user",
-          content: `Search X posts from the allowed handles between ${fromDate} and ${toDate}. Return only posts materially related to Codex or ChatGPT Work usage-limit resets, quota resets, reset timing, or direct replies to reset requests. Include exact timestamps and original status URLs. Translate only the title, scope, parent context, and reason fields; keep text verbatim. Return an empty items array when no qualifying post is found.`,
-        },
-      ],
-      tools: [{
-        type: "x_search",
-        allowed_x_handles: [...ALLOWED_HANDLES],
-        from_date: fromDate,
-        to_date: toDate,
-      }],
-      text: {
-        format: {
-          type: "json_schema",
-          name: "codex_reset_evidence",
-          strict: true,
-          schema: discoverySchema,
-        },
-      },
-    }),
-    signal: AbortSignal.timeout(45_000),
-  });
-
-  if (!response.ok) {
-    throw new Error(await describeXaiError(response));
-  }
-
-  const payload = await response.json();
-  return extractVerifiedDiscoveries(payload, now) as Discovery[];
-}
-
-function mergeSnapshots(
-  baseline: MonitorSnapshot,
-  stored: MonitorSnapshot | null,
-  discoveries: Discovery[],
-  now: Date,
-): MonitorSnapshot {
-  const liveEvents = discoveries.flatMap((item) => item.kind === "confirmed_reset" ? [toResetEvent(item)] : []);
-  const liveSignals = discoveries.flatMap((item) => item.kind !== "confirmed_reset" ? [toSignal(item)] : []);
-  const retentionCutoff = now.getTime() - RETAIN_LIVE_DAYS * 86_400_000;
-  const baselineEventIds = new Set(baseline.events.map((item) => item.id));
-  const baselineSignalIds = new Set(baseline.signals.map((item) => item.id));
-  const retainedEvents = stored?.events.filter((item) => baselineEventIds.has(item.id) || new Date(item.dateTime).getTime() >= retentionCutoff) ?? [];
-  const retainedSignals = stored?.signals.filter((item) => baselineSignalIds.has(item.id) || new Date(item.createdAt).getTime() >= retentionCutoff) ?? [];
-
-  return {
-    generatedAt: discoveries.length > 0 ? now.toISOString() : stored?.generatedAt ?? baseline.generatedAt,
-    events: dedupeById([...baseline.events, ...retainedEvents, ...liveEvents])
-      .sort((a, b) => a.dateTime.localeCompare(b.dateTime)),
-    signals: dedupeById([...baseline.signals, ...retainedSignals, ...liveSignals])
-      .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
-  };
-}
-
-function toResetEvent(item: Discovery): ResetEvent {
-  const statusId = getStatusId(item.source_url)!;
-  return {
-    id: `xai-${statusId}`,
-    type: "confirmed-reset",
-    dateTime: new Date(item.created_at).toISOString(),
-    title: { ko: item.title_ko, en: item.title_en },
-    text: item.text,
-    scope: { ko: item.scope_ko, en: item.scope_en },
-    author: item.author,
-    sourceUrl: item.source_url,
-    reason: { ko: item.reason_ko, en: item.reason_en },
-  };
-}
-
-function toSignal(item: Discovery): Signal {
-  const statusId = getStatusId(item.source_url)!;
-  const classification = item.kind === "upward_signal"
-    ? "upward-signal"
-    : item.kind === "negative_signal"
-      ? "negative-signal"
-      : "archived-signal";
-  const deterministic = classifyPost({ text: item.text });
-  const impacts = classification === "upward-signal"
-    ? { impact24h: 21, impact48h: 17 }
-    : classification === "negative-signal"
-      ? { impact24h: -2, impact48h: -3 }
-      : { impact24h: deterministic.impact24h, impact48h: deterministic.impact48h };
-
-  return {
-    id: `xai-${statusId}`,
-    createdAt: new Date(item.created_at).toISOString(),
-    text: item.text,
-    author: item.author,
-    handle: `@${item.handle.replace(/^@/, "")}`,
-    parentText: { ko: item.parent_text_ko, en: item.parent_text_en },
-    sourceUrl: item.source_url,
-    classification,
-    ...impacts,
-    ttlHours: 48,
-  };
-}
-
-function parseSnapshot(value?: string | null): MonitorSnapshot | null {
+function parseSnapshot(value: string | undefined): MonitorSnapshot | null {
   if (!value) return null;
   try {
-    const parsed = JSON.parse(value) as MonitorSnapshot;
-    if (!parsed || typeof parsed.generatedAt !== "string" || !Array.isArray(parsed.events) || !Array.isArray(parsed.signals)) return null;
-    return parsed;
+    const parsed = JSON.parse(value) as Partial<MonitorSnapshot>;
+    if (!Array.isArray(parsed.events) || !Array.isArray(parsed.signals)) return null;
+    return {
+      generatedAt: typeof parsed.generatedAt === "string" ? parsed.generatedAt : monitorData.generatedAt,
+      events: parsed.events,
+      signals: parsed.signals,
+    };
   } catch {
     return null;
   }
 }
 
-function dedupeById<T extends { id: string }>(items: T[]) {
-  return [...new Map(items.map((item) => [item.id, item])).values()];
-}
-
-function result(
-  snapshot: MonitorSnapshot,
-  status: MonitorSyncMeta["status"],
-  lastSuccessAt: string | null,
-  lastAttemptAt: string | null,
-  error: string | null = null,
-): MonitorSyncResult {
+function mergeSnapshots(baseline: MonitorSnapshot, stored: MonitorSnapshot | null): MonitorSnapshot {
+  if (!stored) return baseline;
   return {
-    snapshot,
-    meta: {
-      source: "spacexai-x-search",
-      intervalHours: 4,
-      status,
-      lastSuccessAt,
-      lastAttemptAt,
-      error,
-    },
+    generatedAt: stored.generatedAt || baseline.generatedAt,
+    events: dedupeById([...baseline.events, ...stored.events])
+      .sort((a, b) => a.dateTime.localeCompare(b.dateTime)),
+    signals: dedupeById([...baseline.signals, ...stored.signals])
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
   };
 }
 
-function safeErrorMessage(error: unknown) {
-  const message = typeof error === "string"
-    ? error
-    : error instanceof Error
-      ? error.message
-      : "Unknown refresh error";
-  return message.replace(/[\r\n]+/g, " ").slice(0, 400);
+function dedupeById<T extends { id: string }>(items: T[]) {
+  return [...new Map(items.map((item) => [item.id, item])).values()];
 }
-
-async function describeXaiError(response: Response) {
-  const prefix = `SpaceXAI returned HTTP ${response.status}`;
-  try {
-    const body = await response.json() as {
-      error?: { message?: unknown } | string;
-      message?: unknown;
-    };
-    const detail = typeof body.error === "string"
-      ? body.error
-      : typeof body.error?.message === "string"
-        ? body.error.message
-        : typeof body.message === "string"
-          ? body.message
-          : null;
-    return detail ? `${prefix}: ${safeErrorMessage(detail)}` : prefix;
-  } catch {
-    return prefix;
-  }
-}
-
-function formatIsoDate(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
-
-const discoverySchema = {
-  type: "object",
-  additionalProperties: false,
-  required: ["items"],
-  properties: {
-    items: {
-      type: "array",
-      maxItems: 40,
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: [
-          "source_url", "author", "handle", "created_at", "text",
-          "parent_text_en", "parent_text_ko", "kind", "title_en", "title_ko",
-          "scope_en", "scope_ko", "reason_en", "reason_ko",
-        ],
-        properties: {
-          source_url: { type: "string", format: "uri" },
-          author: { type: "string", minLength: 1, maxLength: 100 },
-          handle: { type: "string", minLength: 1, maxLength: 30 },
-          created_at: { type: "string", format: "date-time" },
-          text: { type: "string", minLength: 1, maxLength: 1000 },
-          parent_text_en: { type: "string", maxLength: 1000 },
-          parent_text_ko: { type: "string", maxLength: 1000 },
-          kind: { type: "string", enum: ["confirmed_reset", "upward_signal", "negative_signal", "archived_signal"] },
-          title_en: { type: "string", minLength: 1, maxLength: 120 },
-          title_ko: { type: "string", minLength: 1, maxLength: 120 },
-          scope_en: { type: "string", minLength: 1, maxLength: 200 },
-          scope_ko: { type: "string", minLength: 1, maxLength: 200 },
-          reason_en: { type: "string", minLength: 1, maxLength: 300 },
-          reason_ko: { type: "string", minLength: 1, maxLength: 300 },
-        },
-      },
-    },
-  },
-} as const;

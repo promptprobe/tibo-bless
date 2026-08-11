@@ -2,13 +2,12 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 import { monitorData } from "../app/monitor-data";
-import { normalizeAlertEmail, saveAlertSubscription, sendMercyAlerts, unsubscribeFromAlerts } from "../lib/email-alerts";
-import { refreshMonitorSnapshot } from "../lib/xai-monitor";
+import { normalizeAlertEmail, saveAlertSubscription, unsubscribeFromAlerts } from "../lib/email-alerts";
+import { readMonitorSnapshot } from "../lib/xai-monitor";
 
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
-  XAI_API_KEY?: string;
   RESEND_API_KEY?: string;
   ALERT_FROM_EMAIL?: string;
   PUBLIC_SITE_URL?: string;
@@ -42,7 +41,7 @@ const worker = {
         const payload = await request.json() as { email?: unknown };
         const email = normalizeAlertEmail(payload.email);
         if (!email) return Response.json({ error: "Enter a valid email address" }, { status: 400 });
-        const monitor = await refreshMonitorSnapshot(env);
+        const monitor = await readMonitorSnapshot(env);
         const latest = [...monitor.snapshot.events].sort((a, b) => b.dateTime.localeCompare(a.dateTime))[0];
         const result = await saveAlertSubscription(env, email, latest?.id ?? null);
         return Response.json({ ok: true, ...result }, { headers: { "Cache-Control": "no-store" } });
@@ -66,9 +65,9 @@ const worker = {
         return Response.json({
           snapshot: monitorData,
           meta: {
-            source: "spacexai-x-search",
-            intervalHours: 4,
-            status: "missing-key",
+            source: "stored-snapshot",
+            intervalHours: null,
+            status: "disabled",
             lastSuccessAt: null,
             lastAttemptAt: null,
             error: null,
@@ -76,7 +75,7 @@ const worker = {
         }, { headers: { "Cache-Control": "no-store" } });
       }
       try {
-        const result = await refreshMonitorSnapshot(env);
+        const result = await readMonitorSnapshot(env);
         return Response.json(result, {
           headers: { "Cache-Control": "no-store" },
         });
@@ -98,13 +97,6 @@ const worker = {
     }
 
     return handler.fetch(request, env, ctx);
-  },
-
-  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext) {
-    ctx.waitUntil((async () => {
-      const result = await refreshMonitorSnapshot(env, { force: true });
-      await sendMercyAlerts(env, result.snapshot);
-    })());
   },
 };
 

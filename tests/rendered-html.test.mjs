@@ -132,22 +132,34 @@ test("keeps unrelated reference branding out of repository-facing copy", async (
   assert.doesNotMatch(`${readme}\n${app}`, /codexreset\.org/i);
 });
 
-test("serves the baseline monitor safely when hosted secrets are unavailable", async () => {
+test("serves the stored monitor without any crawler configuration", async () => {
   const worker = await loadWorker();
   const response = await worker.fetch(new Request("http://localhost/api/monitor"), {
     ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) },
   }, { waitUntil() {}, passThroughOnException() {} });
   assert.equal(response.status, 200);
   const payload = await response.json();
-  assert.equal(payload.meta.intervalHours, 4);
-  assert.equal(payload.meta.status, "missing-key");
+  assert.equal(payload.meta.intervalHours, null);
+  assert.equal(payload.meta.status, "disabled");
   assert.equal(payload.meta.lastAttemptAt, null);
   assert.equal(payload.meta.error, null);
   assert.equal(payload.snapshot.events.length, 12);
   assert.equal(payload.snapshot.signals.length, 2);
 });
 
-test("forces each scheduled four-hour X search slot", async () => {
+test("contains no scheduled X crawler or X API request path", async () => {
   const workerSource = await readFile(new URL("../worker/index.ts", import.meta.url), "utf8");
-  assert.match(workerSource, /scheduled[\s\S]*refreshMonitorSnapshot\(env, \{ force: true \}\)/);
+  const monitorSource = await readFile(new URL("../lib/xai-monitor.ts", import.meta.url), "utf8");
+  const viteSource = await readFile(new URL("../vite.config.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(workerSource, /scheduled|XAI_API_KEY|refreshMonitorSnapshot/);
+  assert.doesNotMatch(monitorSource, /api\.x\.ai|x_search|XAI_API_KEY|fetch\(/);
+  assert.doesNotMatch(viteSource, /crons/);
+});
+
+test("shows that automatic radar refresh is paused", async () => {
+  const response = await render();
+  const html = await response.text();
+  assert.match(html, /자동 갱신/);
+  assert.match(html, /중단됨/);
+  assert.doesNotMatch(html, /4시간마다/);
 });
